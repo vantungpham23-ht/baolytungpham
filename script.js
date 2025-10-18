@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     // Password validation
-    const validPasswords = ['2203', '0208', '2206'];
+    const validPasswords = ['220302082206'];
     const passwordScreen = document.getElementById('password-screen');
     const passwordInput = document.getElementById('password-input');
     const passwordSubmit = document.getElementById('password-submit');
