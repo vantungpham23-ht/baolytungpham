@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Love Timeline</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Password Protection Screen -->
+    <div id="password-screen" class="password-overlay">
+        <div class="password-container">
+            <div class="password-header">
+                <div class="lock-icon">🔒</div>
+                <h2>Mật Khẩu Tình Yêu</h2>
+                <p>Nhập mật khẩu để khám phá những kỷ niệm đẹp của chúng ta</p>
+            </div>
+            <div class="password-form">
+                <input type="password" id="password-input" placeholder="Nhập mật khẩu..." maxlength="4">
+                <button id="password-submit">Mở Khóa</button>
+            </div>
+            <div id="password-error" class="password-error" style="display: none;">
+                ❌ Mật khẩu không đúng! Hãy thử lại.
+            </div>
+        </div>
+    </div>
+
+    <!-- Loader overlay -->
+    <div class="loader" role="status" aria-live="polite" aria-label="Đang tải tình yêu">
+        <div class="loader-box">
+            <div class="loader-decor" aria-hidden="true">
+                <div class="l-heart lh1"></div>
+                <div class="l-heart lh2"></div>
+                <div class="l-heart lh3"></div>
+                <div class="spark sp1"></div>
+                <div class="spark sp2"></div>
+                <div class="spark sp3"></div>
+            </div>
+            <div class="loader-step step-1">[Khởi tạo] Dữ liệu tình yêu...</div>
+            <div class="loader-step step-2" aria-hidden="true">Hệ thống đang tìm kiếm những khoảnh khắc đáng yêu nhất...</div>
+            <div class="loader-step step-3" aria-hidden="true">Tín hiệu từ vũ trụ tình yêu đang được gửi đến... 📡</div>
+            <div class="loader-step step-4" aria-hidden="true">Tadaaa! Mở ra nhé! 🎉</div>
+        </div>
+    </div>
+
+    <!-- Animated hearts background behind content -->
+    <div class="bg-hearts" aria-hidden="true">
+        <div class="heart h1"></div>
+        <div class="heart h2"></div>
+        <div class="heart h3"></div>
+        <div class="heart h4"></div>
+        <div class="heart h5"></div>
+        <div class="heart h6"></div>
+        <div class="heart h7"></div>
+        <div class="heart h8"></div>
+        <div class="heart h9"></div>
+        <div class="heart h10"></div>
+        <div class="heart h11"></div>
+        <div class="heart h12"></div>
+        <div class="heart h13"></div>
+        <div class="heart h14"></div>
+        <div class="heart h15"></div>
+        <div class="heart h16"></div>
+        <div class="heart h17"></div>
+        <div class="heart h18"></div>
+        <div class="heart h19"></div>
+        <div class="heart h20"></div>
+        <div class="heart h21"></div>
+        <div class="heart h22"></div>
+        <div class="heart h23"></div>
+        <div class="heart h24"></div>
+    </div>
+
+    <div id="content-root" class="content-hidden">
+    <header class="header container">
+        <h1>Hành Trình Tình Yêu Của Chúng Ta</h1>
+        <p>Mỗi khoảnh khắc bên em đều là một kỷ niệm đáng giá ❤️</p>
+    </header>
+
+    <main class="timeline container">
+        <div class="timeline-item" data-aos="fade-right">
+            <div class="timeline-content">
+                <h3>Lần Đầu Gặp Gỡ</h3>
+                <div class="timeline-date">Ngày 30 tháng 1, 2025</div>
+                <p>Ngày đầu chúng ta gặp nhau đi cà phê ở Mochi garden đánh bài tết hẹ hẹ</p>
+                <img src="img/30th1 first.jpg" alt="First Meeting">
+            </div>
+        </div>
+
+        <div class="timeline-item" data-aos="fade-left">
+            <div class="timeline-content">
+                <h3>Buổi Hẹn Đầu Tiên</h3>
+                <div class="timeline-date">không nhớ ngày kkkk</div>
+                <p>Anh chỉ nhớ lần đầu ta đi riêng là đi xem phim sau đó về nhà anh chơi</p>
+                 <img src="img/di cho bi mat.JPG" alt="First Date">
+            </div>
+        </div>
+
+        <div class="timeline-item" data-aos="fade-right">
+            <div class="timeline-content">
+                <h3>Bó hoa đầu tiên</h3>
+                <div class="timeline-date">Ngày 10 tháng 05, 2025</div>
+                <p>Anh đón em đi làm ở KD về rùi tặng em mụt bó hoa hehe</p>
+                 <img src="img/bo hoa dau.PNG" alt="First Trip">
+            </div>
+        </div>
+
+        <div class="timeline-item" data-aos="fade-left">
+            <div class="timeline-content">
+                <h3>Đi chơi thể thaooo</h3>
+                <div class="timeline-date">Ngày 6 tháng 6, 2025</div>
+                <p>Đi kím tí mồ hôi pickleball</p>
+                 <img src="img/di choi pick.JPEG" alt="One Year Anniversary">
+            </div>
+        </div>
+
+        <div class="timeline-item" data-aos="fade-right">
+            <div class="timeline-content">
+                <h3>Trốn làm qua chỗ anh học</h3>
+                <div class="timeline-date">Ngày 20 tháng 5, 2025</div>
+                <p>Suốt ngày trốn làm nời xong nghỉ việc lun</p>
+                <img src="img/bao ly tron lam.JPG" alt="First Meeting">
+            </div>
+        </div>
+
+        <div class="timeline-item" data-aos="fade-left">
+            <div class="timeline-content">
+                <h3>Baoly đi đăng ký học bằng lái xe</h3>
+                <div class="timeline-date">Ngày 10 tháng 06, 2025</div>
+                <p>Chở em đi đăng ký học bằng lái xe</p>
+                 <img src="img/cho bao ly di dki lai xe.jpg" alt="First Date">
+            </div>
+        </div>
+
+        <div class="timeline-item" data-aos="fade-right">
+            <div class="timeline-content">
+                <h3>Chuyến Đi Chơi Xa Đầu Tiên</h3>
+                <div class="timeline-date">Ngày 16 tháng 06, 2025</div>
+                <p>Chuyến đi đầu tiên của 2 đứa kkk chuyến đi Quảng Bình bất ổn :V</p>
+                 <img src="img/di phong nha ne.jpg" alt="First Trip">
+            </div>
+        </div>
+
+        <div class="timeline-item" data-aos="fade-left">
+            <div class="timeline-content">
+                <h3>Chụp ảnh chung ở Phong Nha kẻ bàng nè</h3>
+                <div class="timeline-date">Ngày 25 tháng 12, 2024</div>
+                <p>Đi phong nha nè</p>
+                 <img src="img/anh o phong nha.JPG" alt="One Year Anniversary">
+                 <img src="img/trong dong 2.JPG" alt="One Year Anniversary">
+            </div>
+        </div>
+
+        <div class="timeline-item" data-aos="fade-right">
+            <div class="timeline-content">
+                <h3>Chuyến đi thứ hai của chúng ta </h3>
+                <div class="timeline-date">Ngày 28 tháng 06, 2025</div>
+                <p>Nhận chiếc VF3 để bắt đầu vi vu Đà Nẵng hẹ hẹ</p>
+                <img src="img/tren con VF3 tai dN.jpg" alt="First Meeting">
+            </div>
+        </div>
+
+        <div class="timeline-item" data-aos="fade-left">
+            <div class="timeline-content">
+                <h3>Đặt một đống đồ shoppee</h3>
+                <div class="timeline-date">Ngày 28 tháng 06, 2025</div>
+                <p>Chưa tới mà shiper đã tìm ròi kaka</p>
+                 <img src="img/shopping at shopee.jpg" alt="First Date">
+            </div>
+        </div>
+
+        <div class="timeline-item" data-aos="fade-right">
+            <div class="timeline-content">
+                <h3>Đi coi pháo hoa</h3>
+                <div class="timeline-date">Ngày 28 tháng 06, 2025</div>
+                <p>Đi coi pháo hoa mà trời hơi mưa kakaa</p>
+                 <img src="img/coi phao hoa ma mua.jpg" alt="First Trip">
+            </div>
+        </div>
+
+        <div class="timeline-item" data-aos="fade-left">
+            <div class="timeline-content">
+                <h3>Ra biển Đà Nẵng ngồi chơi nè</h3>
+                <div class="timeline-date">Ngày 29 tháng 06, 2025</div>
+                <p>Đi ăn mỳ mực ở Mân Thái</p>
+                 <img src="img/bienda nang.JPG" alt="One Year Anniversary">
+            </div>
+        </div>
+        
+        <div class="timeline-item" data-aos="fade-right">
+            <div class="timeline-content">
+                <h3>Đi Hội An nè</h3>
+                <div class="timeline-date">Ngày 30 tháng 6, 2025</div>
+                <p>Lái con VF3 xún Hội An</p>
+                <img src="img/hoian ne.jpg" alt="First Meeting">
+            </div>
+        </div>
+        <div class="timeline-item" data-aos="fade-right">
+            <div class="timeline-content">
+                <h3>Đi ăn 4P's và tặng em 1 bó hoa xinh</h3>
+                <div class="timeline-date">Ngày 30 tháng 6, 2025</div>
+                <p>Đi ăn 4P's và tặng em 1 bó hoa xinh mà quên nói tỏ tính kakaaa</p>
+                <img src="img/tang em 1 bo hoa.jpg" alt="First Meeting">
+                <img src="img/iu.PNG" alt="First Meeting">
+            </div>
+        </div>
+
+        <div class="timeline-item" data-aos="fade-left">
+            <div class="timeline-content">
+                <h3>Đi chụp photobooth cùng nhau</h3>
+                <div class="timeline-date">không nhớ ngày kkkk</div>
+                <p>Anh chỉ nhớ lần đầu ta đi riêng là đi xem phim sau đó về nhà anh chơi</p>
+                 <img src="img/photo booth lan 1.JPG" alt="First Date">
+                 <img src="img/xong phai di them lan 2.JPG" alt="First Date">
+            </div>
+        </div>
+        <div class="timeline-item" data-aos="fade-left">
+            <div class="timeline-content">
+                <h3>Sinh nhật em iuuuuuuu </h3>
+                <div class="timeline-date">02 tháng 08 năm 2025</div>
+                <p>Chúc mừng tuổi mới em iu</p>
+                 <img src="img/sinh nhat em.JPG" alt="First Date">
+          
+            </div>
+        </div>
+
+        <div class="timeline-item" data-aos="fade-right">
+            <div class="timeline-content">
+                <h3>Baoly đi làm ở Lux</h3>
+                <div class="timeline-date">Ngày 18 tháng 08, 2025</div>
+                <p>Anh đón em đi làm ở Lux về rùi tặng em mụt bó hoa, lần này làm được lâu hơn rùi nè, em cũm vui vẻ hơn hè hehe</p>
+                 <img src="img/hoa ngay di lam o lux.PNG" alt="First Trip">
+                 <img src="img/bao ly lam o lux.jpg" alt="First Trip">
+            </div>
+        </div>
+
+        <div class="timeline-item" data-aos="fade-left">
+            <div class="timeline-content">
+                <h3>BaoLy di học lái xe</h3>
+                <div class="timeline-date">hihi</div>
+                <p>lần đầu ngồi xe Baoly lái</p>
+                 <img src="img/bao ly di hoc lai.jpg" alt="One Year Anniversary">
+            </div>
+        </div>
+
+        <div class="timeline-item" data-aos="fade-right">
+            <div class="timeline-content">
+                <h3>Bó hoa xin lỗi kkk</h3>
+                <div class="timeline-date">Ngày 3 tháng 9, 2025</div>
+                <p>Hôm đó tưởng đứt lun rùi mà tính ra lần nào cũm tưởng đứt kk
+
+                </p>
+                <img src="img/hoa xin loi kk.PNG" alt="First Meeting">
+                <img src="img/iu gian mua xi ta buck .PNG" alt="First Meeting">
+            </div>
+        </div>
+
+        <div class="timeline-item" data-aos="fade-left">
+            <div class="timeline-content">
+                <h3>Đi ún xì ta búc nè</h3>
+                <div class="timeline-date">^^</div>
+                <p>Hết giựn rùi ra ngồi xì ta búc nhìn iu he</p>
+                 <img src="img/xi ta buck ha tinh.jpg" alt="First Date">
+            </div>
+        </div>
+
+        <div class="timeline-item" data-aos="fade-right">
+            <div class="timeline-content">
+                <h3>Baolyy có bằng đón đi Vinh chơi nè</h3>
+                <div class="timeline-date">Ngày 16 tháng 10, 2025</div>
+                <p>Đi Vinh mà toàn ngồi trên xe về còn cãi nhau chia tay</p>
+                 <img src="img/bao ly don minh.jpg" alt="First Trip">
+                 <img src="img/IMG_3618.PNG" alt="First Trip">
+            </div>
+        </div>
+    </div>
+       <!-- start footer -->
+
+    <footer class="final-message" data-aos="zoom-in">
+        <div class="container">
+            <h2>...Và hành trình của chúng ta chỉ mới bắt đầu</h2>
+            <p>Cảm ơn em đã đến và vẽ thêm những màu sắc rực rỡ vào cuộc sống của anh. Chúc mừng 20/10, tình yêu của anh!</p>
+        </div>
+    </footer>
+    </div>
+
+    <!-- Fireworks Animation -->
+    <div id="fireworks" class="fireworks-container" aria-hidden="true">
+        <div class="firework fw1"></div>
+        <div class="firework fw2"></div>
+        <div class="firework fw3"></div>
+        <div class="firework fw4"></div>
+        <div class="firework fw5"></div>
+        <div class="firework fw6"></div>
+        <div class="firework fw7"></div>
+        <div class="firework fw8"></div>
+    </div>
+
+    <!-- Celebration Popup -->
+    <div id="celebration-popup" class="popup-overlay" aria-hidden="true">
+        <div class="popup-letter">
+            <div class="letter-envelope">
+                <div class="envelope-flap"></div>
+                <div class="letter-content">
+                    <div class="letter-header">
+                        <div class="letter-heart-icon">💕</div>
+                        <h3>Chúc mừng!</h3>
+                    </div>
+                    <div class="letter-body">
+                        <p>Em đã khám phá hết tất cả những kỷ niệm đẹp của chúng ta!</p>
+                        <p>Mỗi lá thư đều chứa đựng những khoảnh khắc đáng giá mà chúng ta đã cùng nhau trải qua.</p>
+                        <p>Cảm ơn em đã dành thời gian để đọc và chia sẻ những kỷ niệm này với anh.</p>
+                        <p>Còn nhiều kỷ niệm nữa mà anh chưa liệt kê hết được hẹ hẹ </p>
+                    </div>
+                    <div class="letter-footer">
+                        <p><strong>Với tình yêu,</strong><br>Tùng Phạm & BaoLy ❤️</p>
+                    </div>
+                </div>
+            </div>
+            <button class="close-popup" aria-label="Đóng thư">✕</button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
