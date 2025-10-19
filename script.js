@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const enteredPassword = passwordInput.value.trim();
         
         if (validPasswords.includes(enteredPassword)) {
-            // Prepare audio playback to satisfy mobile browser gesture requirement
+            // Only prepare audio context, DO NOT play music yet
             try {
                 if (typeof ensureAudio === 'function') {
                     ensureAudio().then(function(){
@@ -69,23 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             }
                             updateTrackDisplay();
                         }
-                        // Pre-play muted so that after loading we can raise volume
-                        var trackEl = (typeof getCurrentTrackElement === 'function') ? getCurrentTrackElement() : null;
-                        if (trackEl && typeof trackEl.play === 'function') {
-                            var prevVol = trackEl.volume;
-                            trackEl.volume = 0;
-                            var p = trackEl.play();
-                            if (p && typeof p.then === 'function') {
-                                p.then(function(){
-                                    isPlaying = true;
-                                    if (typeof updatePlayButton === 'function') updatePlayButton();
-                                    // restore previous volume after loader completes in finishLoading()
-                                }).catch(function(){ 
-                                    // Mobile browsers block autoplay - will handle in finishLoading
-                                    console.log('Audio autoplay blocked - will require user interaction');
-                                });
-                            }
-                        }
+                        console.log('Audio context ready, music will play ONLY after loader completes');
                     });
                 }
             } catch(_) {}
@@ -142,58 +126,65 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         function finishLoading() {
+            // First, hide loader and show content
             if (loader) loader.classList.add('fade-out');
             if (contentRoot) contentRoot.classList.remove('content-hidden');
             if (contentRoot) contentRoot.classList.add('content-visible');
+            
             // Ensure we start at top and header/title is visible on first view
             try {
                 window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
             } catch (_) {
                 window.scrollTo(0, 0);
             }
+            
             // Refresh AOS after reveal
             if (window.AOS && AOS.refreshHard) {
                 AOS.refreshHard();
             } else if (window.AOS) {
                 AOS.refresh();
             }
-            // Start/continue music after loading
+            
+            // Only start music AFTER content is fully visible and loader is gone
             setTimeout(function() {
-                var track = getCurrentTrackElement && getCurrentTrackElement();
-                // If already playing (muted), simply raise volume now
-                if (track && isPlaying) {
-                    track.volume = 0.7;
-                    updatePlayButton && updatePlayButton();
-                    return;
+                console.log('Loader completed, content visible - now starting background music');
+                
+                // Resume audio context if suspended (from password validation)
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume().then(function() {
+                        console.log('Audio context resumed for music playback');
+                        startMusicAfterLoading();
+                    }).catch(function(e) {
+                        console.warn('Failed to resume audio context:', e);
+                        startMusicAfterLoading();
+                    });
+                } else {
+                    startMusicAfterLoading();
                 }
-                if (currentTrack && !isPlaying) {
-                    // Ensure we start with music.mp3
-                    currentTrackIndex = trackList.indexOf('music.mp3');
-                    if (currentTrackIndex === -1) currentTrackIndex = 0;
-                    updateTrackDisplay();
-                    
-                    var tryPlay = function(){
-                        var track = getCurrentTrackElement();
-                        if (track) {
+                
+                function startMusicAfterLoading() {
+                    // Double check that content is visible before playing music
+                    if (contentRoot && contentRoot.classList.contains('content-visible')) {
+                        var track = getCurrentTrackElement && getCurrentTrackElement();
+                        if (track && !isPlaying) {
                             track.volume = 0.7; // Default volume
-                            var p = track.play();
-                            if (p && typeof p.catch === 'function') {
-                                p.then(function(){
-                                    isPlaying = true;
-                                    updatePlayButton();
-                                    // Hide any mobile audio prompt if it exists
-                                    hideMobileAudioPrompt();
-                                }).catch(function(){
-                                    // Autoplay was prevented, show mobile-friendly prompt
+                            track.play().then(function() {
+                                isPlaying = true;
+                                updatePlayButton();
+                                console.log('Background music started after loader completion');
+                            }).catch(function(e) {
+                                console.warn('Auto-play blocked:', e);
+                                // On mobile, show the audio prompt
+                                if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
                                     showMobileAudioPrompt();
-                                });
-                            }
+                                }
+                            });
                         }
-                    };
-                    tryPlay();
+                    } else {
+                        console.log('Content not yet visible, skipping music start');
+                    }
                 }
-            }, 1000); // Small delay to ensure UI is ready
-            // Audio controls are now handled by the music player system
+            }, 800); // Wait a bit longer to ensure content is fully visible
         }
 
         if (loader && contentRoot) {
@@ -530,44 +521,15 @@ document.addEventListener('DOMContentLoaded', function () {
     function enableAudioOnMobile() {
         hideMobileAudioPrompt();
         
-        // First ensure audio context is resumed
-        if (audioCtx && audioCtx.state === 'suspended') {
-            audioCtx.resume().then(function() {
-                console.log('Audio context resumed');
-                tryPlayAudioOnMobile();
-            }).catch(function(e) {
-                console.warn('Failed to resume audio context:', e);
-                tryPlayAudioOnMobile();
-            });
-        } else {
-            tryPlayAudioOnMobile();
-        }
-    }
-    
-    function tryPlayAudioOnMobile() {
-        // Try to play current track
+        // Only play music if user explicitly clicks the speaker button
+        // This function is now only called from the mobile audio prompt
         var track = getCurrentTrackElement();
         if (track) {
             track.volume = 0.7;
-            
-            // Add user interaction event listeners to the track itself
-            track.addEventListener('canplaythrough', function() {
-                track.play().then(function() {
-                    isPlaying = true;
-                    updatePlayButton();
-                    console.log('Audio enabled successfully on mobile');
-                }).catch(function(e) {
-                    console.warn('Still cannot play audio:', e);
-                    showAudioError();
-                });
-            }, { once: true });
-            
-            // Force load the audio
-            track.load();
             track.play().then(function() {
                 isPlaying = true;
                 updatePlayButton();
-                console.log('Audio enabled successfully on mobile');
+                console.log('Audio enabled by user interaction');
             }).catch(function(e) {
                 console.warn('Still cannot play audio:', e);
                 showAudioError();
@@ -602,29 +564,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ===== Pleasant click sound for interactive elements =====
     var audioCtx; var clickBuffer;
-    var audioEnabled = false; // Track if audio has been enabled by user interaction
     
     function ensureAudio() {
         if (audioCtx) return Promise.resolve();
         try {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            // Safari requires user gesture to start audio context
-            if (audioCtx.state === 'suspended') {
-                return new Promise(function(resolve) {
-                    var resume = function() {
-                        audioCtx.resume().then(function() {
-                            audioEnabled = true;
-                            resolve();
-                        });
-                        document.removeEventListener('touchstart', resume);
-                        document.removeEventListener('click', resume);
-                    };
-                    document.addEventListener('touchstart', resume, { once: true });
-                    document.addEventListener('click', resume, { once: true });
-                });
-            } else {
-                audioEnabled = true;
-            }
+            // Don't auto-resume audio context - wait for password validation
+            console.log('Audio context created, waiting for password validation');
         } catch(e) {
             console.warn('Audio not supported:', e);
             return Promise.resolve();
@@ -632,87 +578,11 @@ document.addEventListener('DOMContentLoaded', function () {
         return Promise.resolve();
     }
     
-    // Global click/touch handler to enable audio on mobile
-    function enableAudioOnFirstInteraction() {
-        if (!audioEnabled) {
-            audioEnabled = true;
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            // Try to play music if user has already entered password
-            if (typeof getCurrentTrackElement === 'function') {
-                var track = getCurrentTrackElement();
-                if (track && !isPlaying) {
-                    track.play().then(function() {
-                        isPlaying = true;
-                        updatePlayButton();
-                        hideMobileAudioPrompt();
-                    }).catch(function(e) {
-                        console.log('Audio still blocked, will show prompt');
-                    });
-                }
-            }
-        }
-    }
+    // Removed global audio enablement - music will only play after password and loading
     
-    // Add global event listeners for audio enablement
-    document.addEventListener('click', enableAudioOnFirstInteraction, { once: true });
-    document.addEventListener('touchstart', enableAudioOnFirstInteraction, { once: true });
-    
-    // ===== Enhanced Mobile Audio System =====
-    var audioUnlocked = false;
-    var audioUnlockAttempted = false;
-    
-    function unlockAudioForMobile() {
-        if (audioUnlocked || audioUnlockAttempted) return;
-        audioUnlockAttempted = true;
-        
-        // Try to unlock all audio elements
-        Object.values(musicTracks).forEach(function(audio) {
-            if (audio && typeof audio.play === 'function') {
-                // Temporarily mute and try to play
-                var wasMuted = audio.muted;
-                audio.muted = true;
-                audio.play().then(function() {
-                    audio.muted = wasMuted;
-                    audioUnlocked = true;
-                    console.log('Audio unlocked successfully');
-                    hideMobileAudioPrompt();
-                }).catch(function(e) {
-                    audio.muted = wasMuted;
-                    console.log('Audio unlock failed:', e);
-                });
-            }
-        });
-    }
-    
-    // Try to unlock audio on any user interaction
-    function attemptAudioUnlock() {
-        if (!audioUnlocked) {
-            unlockAudioForMobile();
-        }
-    }
-    
-    // Add multiple event listeners for better mobile support
-    var unlockEvents = ['click', 'touchstart', 'touchend', 'keydown', 'mousedown'];
-    unlockEvents.forEach(function(event) {
-        document.addEventListener(event, attemptAudioUnlock, { once: true, passive: true });
-    });
-    
-    // Handle visibility change (when user returns to tab)
-    document.addEventListener('visibilitychange', function() {
-        if (!document.hidden && audioUnlocked && isPlaying) {
-            // Reattempt playback when tab becomes visible
-            setTimeout(function() {
-                var track = getCurrentTrackElement();
-                if (track && track.paused) {
-                    track.play().catch(function(e) {
-                        console.log('Replay failed after visibility change:', e);
-                    });
-                }
-            }, 100);
-        }
-    });
+    // ===== Simplified Mobile Audio System =====
+    // Removed all automatic audio unlock systems
+    // Music will ONLY play after password validation and loading completion
     function playClickSound(freq) {
         if (!audioCtx) return;
         var now = audioCtx.currentTime;
@@ -914,29 +784,23 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 })();
 
-// Music Player Controls - Dynamic System
+// Music Player Controls - Simple System
 var musicTracks = {}; // Will store audio elements
 var trackList = []; // Will store discovered tracks
 var currentTrackIndex = 0; // Current track index
 var playBtn = document.querySelector('.play-btn');
-var prevBtn = document.querySelector('.prev-btn');
-var nextBtn = document.querySelector('.next-btn');
-var volumeSlider = document.querySelector('.volume-slider');
-var currentTrackName = document.getElementById('current-track-name');
 var currentTrack = null;
 var isPlaying = false;
 
 // Track metadata with icons and names
 var trackMetadata = {
-    'music.mp3': { icon: '🎶', name: 'Một đời' },
-    'music2.mp3': { icon: '💕', name: 'Giai điệu ngọt ngào' },
-    'music3.mp3': { icon: '✨', name: 'Còn gì đẹp hơn' }
+    'music.mp3': { icon: '🎶', name: 'Một đời' }
 };
 
 // Discover music files in the music folder
 function discoverMusicTracks() {
-    // Only include three tracks
-    return ['music.mp3', 'music2.mp3', 'music3.mp3'];
+    // Only include one track
+    return ['music.mp3'];
 }
 
 // Create audio elements for discovered tracks
@@ -962,21 +826,15 @@ function createAudioElements(tracks) {
 
 // Update current track display
 function updateTrackDisplay() {
-    if (!currentTrackName || trackList.length === 0) return;
+    if (trackList.length === 0) return;
     
     var trackName = trackList[currentTrackIndex];
-    var metadata = trackMetadata[trackName] || { 
-        icon: '🎵', 
-        name: 'Bài hát ' + (currentTrackIndex + 1) 
-    };
-    
-    currentTrackName.textContent = metadata.name;
     currentTrack = trackName;
 }
 
 // Initialize music player
 function initMusicPlayer() {
-    if (!playBtn || !volumeSlider || !prevBtn || !nextBtn) return;
+    if (!playBtn) return;
     
     // Discover and create audio elements
     var tracks = discoverMusicTracks();
@@ -992,77 +850,29 @@ function initMusicPlayer() {
         }
     });
     
-    // Previous button click
-    prevBtn.addEventListener('click', function() {
-        if (trackList.length === 0) return;
-        currentTrackIndex = (currentTrackIndex - 1 + trackList.length) % trackList.length;
-        updateTrackDisplay();
-        if (isPlaying) {
-            playCurrentTrack();
-        }
-    });
-    
-    // Next button click
-    nextBtn.addEventListener('click', function() {
-        if (trackList.length === 0) return;
-        currentTrackIndex = (currentTrackIndex + 1) % trackList.length;
-        updateTrackDisplay();
-        if (isPlaying) {
-            playCurrentTrack();
-        }
-    });
-    
-    // Volume slider
-    volumeSlider.addEventListener('input', function() {
-        var volume = this.value / 100;
-        Object.values(musicTracks).forEach(function(audio) {
-            audio.volume = volume;
-        });
-    });
-    
-    // Don't auto-play here - will be triggered after password validation
+    // Music will ONLY play after loader completes and content is visible
 }
 
 function playCurrentTrack() {
     pauseAllMusic();
     var track = getCurrentTrackElement();
     if (track) {
-        // If audio is not unlocked yet, try to unlock first
-        if (!audioUnlocked) {
-            unlockAudioForMobile();
-            // Wait a bit and try again
-            setTimeout(function() {
-                if (audioUnlocked) {
-                    track.play().then(function() {
-                        isPlaying = true;
-                        updatePlayButton();
-                        hideMobileAudioPrompt();
-                    }).catch(function(e) {
-                        console.warn('Could not play track after unlock:', e);
-                        if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                            showMobileAudioPrompt();
-                        }
-                    });
-                } else {
-                    // Still not unlocked, show prompt
-                    if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                        showMobileAudioPrompt();
-                    }
-                }
-            }, 100);
-        } else {
-            // Audio is unlocked, play normally
-            track.play().then(function() {
-                isPlaying = true;
-                updatePlayButton();
-                hideMobileAudioPrompt();
-            }).catch(function(e) {
-                console.warn('Could not play track:', e);
-                if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                    showMobileAudioPrompt();
-                }
-            });
-        }
+        // Set volume to default
+        track.volume = 0.7;
+        
+        // Try to play the track
+        track.play().then(function() {
+            isPlaying = true;
+            updatePlayButton();
+            hideMobileAudioPrompt();
+            console.log('Music started playing');
+        }).catch(function(e) {
+            console.warn('Could not play track:', e);
+            // On mobile, show the audio prompt
+            if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                showMobileAudioPrompt();
+            }
+        });
     }
 }
 
@@ -1074,13 +884,7 @@ function pauseAllMusic() {
     updatePlayButton();
 }
 
-function switchTrack(trackName) {
-    pauseAllMusic();
-    currentTrackIndex = trackList.indexOf(trackName);
-    if (currentTrackIndex === -1) currentTrackIndex = 0;
-    updateTrackDisplay();
-    playCurrentTrack();
-}
+// Removed switchTrack function as we only have one track
 
 function getCurrentTrackElement() {
     return musicTracks[currentTrack] || null;
@@ -1090,11 +894,13 @@ function updatePlayButton() {
     if (!playBtn) return;
     var icon = playBtn.querySelector('.play-icon');
     if (isPlaying) {
-        icon.textContent = '⏸️';
-        playBtn.setAttribute('aria-label', 'Tạm dừng');
+        icon.textContent = '🔇';
+        playBtn.classList.add('playing');
+        playBtn.setAttribute('aria-label', 'Tắt nhạc');
     } else {
-        icon.textContent = '▶️';
-        playBtn.setAttribute('aria-label', 'Phát nhạc');
+        icon.textContent = '🔊';
+        playBtn.classList.remove('playing');
+        playBtn.setAttribute('aria-label', 'Bật nhạc');
     }
 }
 
