@@ -29,6 +29,35 @@ document.addEventListener('DOMContentLoaded', function () {
         const enteredPassword = passwordInput.value.trim();
         
         if (validPasswords.includes(enteredPassword)) {
+            // Prepare audio playback to satisfy iOS Safari gesture requirement
+            try {
+                if (typeof ensureAudio === 'function') {
+                    ensureAudio().then(function(){
+                        if (typeof updateTrackDisplay === 'function') {
+                            // Ensure we start with music.mp3
+                            if (Array.isArray(trackList) && trackList.length > 0) {
+                                currentTrackIndex = trackList.indexOf('music.mp3');
+                                if (currentTrackIndex === -1) currentTrackIndex = 0;
+                            }
+                            updateTrackDisplay();
+                        }
+                        // Pre-play muted so that after loading we can raise volume
+                        var trackEl = (typeof getCurrentTrackElement === 'function') ? getCurrentTrackElement() : null;
+                        if (trackEl && typeof trackEl.play === 'function') {
+                            var prevVol = trackEl.volume;
+                            trackEl.volume = 0;
+                            var p = trackEl.play();
+                            if (p && typeof p.then === 'function') {
+                                p.then(function(){
+                                    isPlaying = true;
+                                    if (typeof updatePlayButton === 'function') updatePlayButton();
+                                    // restore previous volume after loader completes in finishLoading()
+                                }).catch(function(){ /* ignore; finishLoading will prompt for gesture if needed */ });
+                            }
+                        }
+                    });
+                }
+            } catch(_) {}
             hidePasswordScreen();
         } else {
             showPasswordError();
@@ -97,8 +126,15 @@ document.addEventListener('DOMContentLoaded', function () {
             } else if (window.AOS) {
                 AOS.refresh();
             }
-            // Start playing music.mp3 after password validation and loading
+            // Start/continue music after loading
             setTimeout(function() {
+                var track = getCurrentTrackElement && getCurrentTrackElement();
+                // If already playing (muted), simply raise volume now
+                if (track && isPlaying) {
+                    track.volume = 0.7;
+                    updatePlayButton && updatePlayButton();
+                    return;
+                }
                 if (currentTrack && !isPlaying) {
                     // Ensure we start with music.mp3
                     currentTrackIndex = trackList.indexOf('music.mp3');
