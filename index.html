@@ -80,10 +80,42 @@
     </div>
 
     <div id="content-root" class="content-hidden">
+    <!-- Audio elements will be dynamically created -->
+    <div class="cursor-trail" aria-hidden="true"></div>
     <header class="header container">
         <h1>Hành Trình Tình Yêu Của Chúng Ta</h1>
         <p>Mỗi khoảnh khắc bên em đều là một kỷ niệm đáng giá ❤️</p>
     </header>
+
+    <!-- Music Player Section -->
+    <section class="music-player" data-aos="fade-up">
+        <div class="container">
+            <div class="music-player-header">
+                <h2 class="music-title">🎵 Nhạc Nền Tình Yêu</h2>
+                <p class="music-subtitle">Chọn bài hát yêu thích để nghe cùng những kỷ niệm</p>
+            </div>
+            <div class="music-controls">
+                <div class="player-controls">
+                    <button type="button" class="prev-btn" aria-label="Bài trước">
+                        <span class="prev-icon">⏮️</span>
+                    </button>
+                    <button type="button" class="play-btn" aria-label="Phát/Dừng">
+                        <span class="play-icon">▶️</span>
+                    </button>
+                    <button type="button" class="next-btn" aria-label="Bài tiếp">
+                        <span class="next-icon">⏭️</span>
+                    </button>
+                    <div class="track-info">
+                        <span class="current-track-name" id="current-track-name">Một đời</span>
+                    </div>
+                    <div class="volume-control">
+                        <span class="volume-icon">🔊</span>
+                        <input type="range" class="volume-slider" min="0" max="100" value="70" aria-label="Âm lượng">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <main class="timeline container">
         <div class="timeline-item" data-aos="fade-right">
@@ -289,6 +321,10 @@
         <div class="container">
             <h2>...Và hành trình của chúng ta chỉ mới bắt đầu</h2>
             <p>Cảm ơn em đã đến và vẽ thêm những màu sắc rực rỡ vào cuộc sống của anh. Chúc mừng 20/10, tình yêu của anh!</p>
+            <div style="margin-top:24px;">
+                <button type="button" class="open-slider-btn open-btn">Xem album kỷ niệm</button>
+                <button type="button" class="open-letter-btn open-btn" style="margin-left:12px;">Đọc thư tình</button>
+            </div>
         </div>
     </footer>
     </div>
@@ -324,10 +360,26 @@
                     </div>
                     <div class="letter-footer">
                         <p><strong>Được xây dựng bởi tình yêu,</strong><br>Tùng Phạm & BaoLy ❤️</p>
+                        <div style="margin-top:20px;">
+                            <button type="button" class="open-slider-btn open-btn">Xem album kỷ niệm</button>
+                        </div>
                     </div>
                 </div>
             </div>
-            <button class="close-popup" aria-label="Đóng thư">✕</button>
+        </div>
+    </div>
+
+    <!-- Slider Popup -->
+    <div id="slider-popup" class="popup-overlay" aria-hidden="true">
+        <div class="popup-slider-dialog" role="dialog" aria-label="Album kỷ niệm">
+            <div class="slider-popup-header">
+                <h3 class="slider-popup-title">Album kỷ niệm của chúng ta ✨</h3>
+                <div class="slider-particles" aria-hidden="true"></div>
+            </div>
+            <div class="slider-viewport">
+                <div class="slider-track" id="slider-track"></div>
+                <div class="slider-track duplicate" id="slider-track-dup" aria-hidden="true"></div>
+            </div>
         </div>
     </div>
 
