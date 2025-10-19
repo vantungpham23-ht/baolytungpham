@@ -1,3 +1,31 @@
+// ===== Auto Clear Cache =====
+(function clearCacheOnLoad() {
+    // Clear various types of cache
+    if ('caches' in window) {
+        caches.keys().then(function(names) {
+            names.forEach(function(name) {
+                caches.delete(name);
+            });
+        });
+    }
+    
+    // Clear localStorage if needed (optional - uncomment if you want to clear user data)
+    // localStorage.clear();
+    
+    // Clear sessionStorage
+    sessionStorage.clear();
+    
+    // Force reload images and resources with cache busting
+    var images = document.querySelectorAll('img');
+    images.forEach(function(img) {
+        if (img.src && !img.src.includes('?')) {
+            img.src += '?v=' + Date.now();
+        }
+    });
+    
+    console.log('Cache cleared on page load');
+})();
+
 document.addEventListener('DOMContentLoaded', function () {
     // Password validation
     const validPasswords = ['220302082206'];
@@ -472,12 +500,18 @@ document.addEventListener('DOMContentLoaded', function () {
             enableAudioOnMobile();
         });
         
-        // Auto-hide after 10 seconds
+        // Add touch handler for better mobile support
+        enableBtn.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            enableAudioOnMobile();
+        }, { passive: false });
+        
+        // Auto-hide after 15 seconds (increased time)
         setTimeout(function() {
             if (document.getElementById('mobile-audio-prompt')) {
                 hideMobileAudioPrompt();
             }
-        }, 10000);
+        }, 15000);
     }
     
     function hideMobileAudioPrompt() {
@@ -496,17 +530,46 @@ document.addEventListener('DOMContentLoaded', function () {
     function enableAudioOnMobile() {
         hideMobileAudioPrompt();
         
+        // First ensure audio context is resumed
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume().then(function() {
+                console.log('Audio context resumed');
+                tryPlayAudioOnMobile();
+            }).catch(function(e) {
+                console.warn('Failed to resume audio context:', e);
+                tryPlayAudioOnMobile();
+            });
+        } else {
+            tryPlayAudioOnMobile();
+        }
+    }
+    
+    function tryPlayAudioOnMobile() {
         // Try to play current track
         var track = getCurrentTrackElement();
         if (track) {
             track.volume = 0.7;
+            
+            // Add user interaction event listeners to the track itself
+            track.addEventListener('canplaythrough', function() {
+                track.play().then(function() {
+                    isPlaying = true;
+                    updatePlayButton();
+                    console.log('Audio enabled successfully on mobile');
+                }).catch(function(e) {
+                    console.warn('Still cannot play audio:', e);
+                    showAudioError();
+                });
+            }, { once: true });
+            
+            // Force load the audio
+            track.load();
             track.play().then(function() {
                 isPlaying = true;
                 updatePlayButton();
                 console.log('Audio enabled successfully on mobile');
             }).catch(function(e) {
                 console.warn('Still cannot play audio:', e);
-                // Show a more persistent message
                 showAudioError();
             });
         }
@@ -539,6 +602,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ===== Pleasant click sound for interactive elements =====
     var audioCtx; var clickBuffer;
+    var audioEnabled = false; // Track if audio has been enabled by user interaction
+    
     function ensureAudio() {
         if (audioCtx) return Promise.resolve();
         try {
@@ -547,13 +612,18 @@ document.addEventListener('DOMContentLoaded', function () {
             if (audioCtx.state === 'suspended') {
                 return new Promise(function(resolve) {
                     var resume = function() {
-                        audioCtx.resume().then(resolve);
+                        audioCtx.resume().then(function() {
+                            audioEnabled = true;
+                            resolve();
+                        });
                         document.removeEventListener('touchstart', resume);
                         document.removeEventListener('click', resume);
                     };
                     document.addEventListener('touchstart', resume, { once: true });
                     document.addEventListener('click', resume, { once: true });
                 });
+            } else {
+                audioEnabled = true;
             }
         } catch(e) {
             console.warn('Audio not supported:', e);
@@ -561,6 +631,33 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         return Promise.resolve();
     }
+    
+    // Global click/touch handler to enable audio on mobile
+    function enableAudioOnFirstInteraction() {
+        if (!audioEnabled) {
+            audioEnabled = true;
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            // Try to play music if user has already entered password
+            if (typeof getCurrentTrackElement === 'function') {
+                var track = getCurrentTrackElement();
+                if (track && !isPlaying) {
+                    track.play().then(function() {
+                        isPlaying = true;
+                        updatePlayButton();
+                        hideMobileAudioPrompt();
+                    }).catch(function(e) {
+                        console.log('Audio still blocked, will show prompt');
+                    });
+                }
+            }
+        }
+    }
+    
+    // Add global event listeners for audio enablement
+    document.addEventListener('click', enableAudioOnFirstInteraction, { once: true });
+    document.addEventListener('touchstart', enableAudioOnFirstInteraction, { once: true });
     function playClickSound(freq) {
         if (!audioCtx) return;
         var now = audioCtx.currentTime;
