@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex,nofollow">
+    <meta name="author" content="Tùng Phạm">
+    <meta name="description" content="Trang không tìm thấy - Hành trình tình yêu Tùng Phạm và Bảo Ly">
+    <title>404 - Trang Không Tìm Thấy | Baolytungpham.space</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon-180x180.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#E8A0BF">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        .error-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            background: radial-gradient(1200px 800px at 10% -10%, rgba(232, 160, 191, 0.15), transparent 60%),
+                        radial-gradient(1000px 700px at 110% 10%, rgba(191, 160, 232, 0.12), transparent 60%),
+                        radial-gradient(900px 600px at 50% 120%, rgba(160, 232, 191, 0.10), transparent 60%),
+                        var(--bg-color);
+        }
+        
+        .error-content {
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            border: 2px solid rgba(232, 160, 191, 0.3);
+        }
+        
+        .error-heart {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: heartBeat 2s ease-in-out infinite;
+        }
+        
+        .error-title {
+            font-family: var(--heading-font);
+            font-size: 3rem;
+            color: transparent;
+            background: linear-gradient(135deg, #E8A0BF, #BFA0E8, #A0E8BF);
+            -webkit-background-clip: text;
+            background-clip: text;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 20px rgba(232,160,191,0.3);
+        }
+        
+        .error-message {
+            font-size: 1.2rem;
+            color: #7a6071;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .error-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .error-link {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #E8A0BF, #BFA0E8);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(232,160,191,0.3);
+        }
+        
+        .error-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(232,160,191,0.4);
+        }
+        
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @media screen and (max-width: 768px) {
+            .error-content { padding: 30px 20px; }
+            .error-title { font-size: 2.2rem; }
+            .error-message { font-size: 1rem; }
+            .error-links { gap: 12px; }
+            .error-link { padding: 10px 20px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-content">
+            <div class="error-heart">💔</div>
+            <h1 class="error-title">404</h1>
+            <p class="error-message">
+                Ôi không! Trang này có vẻ như đã "trốn đi" giống như Bảo Ly trốn làm vậy! 😄<br>
+                Nhưng đừng lo, chúng ta có thể tìm lại nhau như những lần trước.
+            </p>
+            <div class="error-links">
+                <a href="/" class="error-link">🏠 Về Trang Chủ</a>
+                <a href="/#timeline" class="error-link">📖 Xem Timeline</a>
+                <a href="/#album" class="error-link">📸 Album Ảnh</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

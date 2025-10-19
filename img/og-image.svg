@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF8F0;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#F8F0FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F0FFF8;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E8A0BF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#BFA0E8;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#E8A0BF;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#BFA0E8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#A0E8BF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+  
+  <!-- Decorative hearts -->
+  <path d="M200 150s-20-13.8-27.3-19.1C165.3 125.4 166.2 115 170.7 108.2c3.5-3.2 8.5-1.8 11.1 2.1L200 125l9.2-4.7c2.6-3.9 7.6-5.3 11.1-2.1 4.5 3.8 5.2 9.6 1.4 14.7C220.5 140.4 200 150 200 150z" fill="url(#heartGradient)" opacity="0.3"/>
+  <path d="M1000 480s-20-13.8-27.3-19.1C965.3 455.4 966.2 445 970.7 438.2c3.5-3.2 8.5-1.8 11.1 2.1L1000 455l9.2-4.7c2.6-3.9 7.6-5.3 11.1-2.1 4.5 3.8 5.2 9.6 1.4 14.7C1020.5 470.4 1000 480 1000 480z" fill="url(#heartGradient)" opacity="0.2"/>
+  
+  <!-- Main heart -->
+  <path d="M600 200s-40-27.6-54.6-38.2C530.6 150.8 532.4 130 541.4 116.4c7-6.4 17-3.6 22.2 4.2L600 150l18.4-9.4c5.2-7.8 15.2-10.6 22.2-4.2 9 7.6 10.4 19.2 2.8 29.4C640.9 180.8 600 200 600 200z" fill="url(#heartGradient)"/>
+  
+  <!-- Title -->
+  <text x="600" y="320" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="url(#textGradient)">Hành Trình Tình Yêu</text>
+  <text x="600" y="370" font-family="Arial, sans-serif" font-size="32" text-anchor="middle" fill="#7a6071">Tùng Phạm &amp; Bảo Ly</text>
+  <text x="600" y="420" font-family="Arial, sans-serif" font-size="24" text-anchor="middle" fill="#888">Những kỷ niệm đẹp và khoảnh khắc đáng giá</text>
+  
+  <!-- URL -->
+  <text x="600" y="550" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="#E8A0BF">baolytungpham.space</text>
+</svg>

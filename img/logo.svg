@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#E8A0BF;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#BFA0E8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#A0E8BF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="200" height="60" fill="#FFF8F0" rx="8"/>
+  <path d="M20 30s-3-2.1-4.1-2.9C14.2 26.1 14.3 25 15.1 24.3c0.7-0.5 1.7-0.3 2.1 0.4L20 25.7l1.8-0.9c0.4-0.7 1.4-0.9 2.1-0.4 0.9 0.6 1.1 1.8 0.3 2.8C23.7 28.6 20 30 20 30z" fill="url(#logoGradient)"/>
+  <text x="35" y="25" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="url(#logoGradient)">Tùng Phạm</text>
+  <text x="35" y="40" font-family="Arial, sans-serif" font-size="12" fill="#7a6071">&amp; Bảo Ly</text>
+  <text x="120" y="35" font-family="Arial, sans-serif" font-size="10" fill="#888">Love Story</text>
+</svg>

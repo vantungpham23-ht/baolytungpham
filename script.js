@@ -168,20 +168,48 @@ document.addEventListener('DOMContentLoaded', function () {
                         var track = getCurrentTrackElement && getCurrentTrackElement();
                         if (track && !isPlaying) {
                             track.volume = 0.7; // Default volume
-                            track.play().then(function() {
-                                isPlaying = true;
-                                updatePlayButton();
-                                console.log('Background music started after loader completion');
-                            }).catch(function(e) {
-                                console.warn('Auto-play blocked:', e);
-                                // On mobile, show the audio prompt
-                                if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                                    showMobileAudioPrompt();
+                            
+                            // Enhanced autoplay handling for Safari and mobile
+                            var playPromise = track.play();
+                            
+                            if (playPromise !== undefined) {
+                                playPromise.then(function() {
+                                    isPlaying = true;
+                                    updatePlayButton();
+                                    console.log('Background music started after loader completion');
+                                }).catch(function(e) {
+                                    console.warn('Auto-play blocked:', e);
+                                    handleAutoplayBlocked();
+                                });
+                            } else {
+                                // Fallback for older browsers
+                                try {
+                                    track.play();
+                                    isPlaying = true;
+                                    updatePlayButton();
+                                    console.log('Background music started (fallback)');
+                                } catch(e) {
+                                    console.warn('Auto-play failed:', e);
+                                    handleAutoplayBlocked();
                                 }
-                            });
+                            }
                         }
                     } else {
                         console.log('Content not yet visible, skipping music start');
+                    }
+                }
+                
+                function handleAutoplayBlocked() {
+                    // Detect Safari specifically
+                    var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+                    var isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                    
+                    if (isSafari || isMobile) {
+                        console.log('Showing audio prompt for Safari/Mobile');
+                        showEnhancedAudioPrompt();
+                    } else {
+                        // For other browsers, show mobile prompt as fallback
+                        showMobileAudioPrompt();
                     }
                 }
             }, 800); // Wait a bit longer to ensure content is fully visible
@@ -443,6 +471,228 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     
+    // ===== Enhanced Audio Prompt Functions =====
+    function showEnhancedAudioPrompt() {
+        // Create an enhanced audio prompt specifically for Safari and mobile
+        var prompt = document.createElement('div');
+        prompt.id = 'enhanced-audio-prompt';
+        prompt.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 32px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+            border: 3px solid rgba(232,160,191,0.4);
+            z-index: 10004;
+            max-width: 380px;
+            width: 90%;
+            animation: enhancedPromptSlideIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        `;
+        
+        prompt.innerHTML = `
+            <div style="font-size: 3rem; margin-bottom: 16px; animation: heartBeat 2s ease-in-out infinite;">🎵</div>
+            <h3 style="font-family: var(--heading-font); color: #7a6071; margin-bottom: 16px; font-size: 1.4rem; font-weight: 600;">Bật nhạc nền</h3>
+            <p style="color: #7a6071; font-size: 1rem; margin-bottom: 24px; line-height: 1.5;">Để có trải nghiệm tốt nhất, hãy bật nhạc nền bằng cách nhấn nút bên dưới</p>
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <button id="enable-audio-enhanced" style="
+                    background: linear-gradient(135deg, #E8A0BF, #BFA0E8);
+                    color: white;
+                    border: none;
+                    border-radius: 30px;
+                    padding: 14px 28px;
+                    font-size: 1.1rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    box-shadow: 0 10px 25px rgba(232,160,191,0.4);
+                    transition: all 0.3s ease;
+                    min-width: 140px;
+                ">🎵 Bật nhạc</button>
+                <button id="skip-audio-enhanced" style="
+                    background: transparent;
+                    color: #7a6071;
+                    border: 2px solid rgba(122,96,113,0.3);
+                    border-radius: 30px;
+                    padding: 14px 28px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    min-width: 120px;
+                ">Bỏ qua</button>
+            </div>
+            <p style="color: #999; font-size: 0.8rem; margin-top: 16px; line-height: 1.4;">Nhạc sẽ tự động phát sau khi bạn nhấn nút này</p>
+        `;
+        
+        document.body.appendChild(prompt);
+        
+        // Add click handlers
+        var enableBtn = document.getElementById('enable-audio-enhanced');
+        var skipBtn = document.getElementById('skip-audio-enhanced');
+        
+        enableBtn.addEventListener('click', function() {
+            enableAudioEnhanced();
+        });
+        
+        skipBtn.addEventListener('click', function() {
+            hideEnhancedAudioPrompt();
+        });
+        
+        // Add touch handlers for better mobile support
+        enableBtn.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            enableAudioEnhanced();
+        }, { passive: false });
+        
+        skipBtn.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            hideEnhancedAudioPrompt();
+        }, { passive: false });
+        
+        // Auto-hide after 20 seconds
+        setTimeout(function() {
+            if (document.getElementById('enhanced-audio-prompt')) {
+                hideEnhancedAudioPrompt();
+            }
+        }, 20000);
+    }
+    
+    function hideEnhancedAudioPrompt() {
+        var prompt = document.getElementById('enhanced-audio-prompt');
+        if (prompt) {
+            prompt.style.opacity = '0';
+            prompt.style.transform = 'translate(-50%, -50%) scale(0.9)';
+            setTimeout(function() {
+                if (prompt.parentNode) {
+                    prompt.parentNode.removeChild(prompt);
+                }
+            }, 300);
+        }
+    }
+    
+    function enableAudioEnhanced() {
+        hideEnhancedAudioPrompt();
+        
+        // Try to play music with enhanced user interaction handling
+        var track = getCurrentTrackElement();
+        if (track) {
+            track.volume = 0.7;
+            
+            // Ensure audio context is resumed
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume().then(function() {
+                    console.log('Audio context resumed for enhanced playback');
+                    playMusicWithRetry(track);
+                }).catch(function(e) {
+                    console.warn('Failed to resume audio context:', e);
+                    playMusicWithRetry(track);
+                });
+            } else {
+                playMusicWithRetry(track);
+            }
+        }
+    }
+    
+    function playMusicWithRetry(track) {
+        var playPromise = track.play();
+        
+        if (playPromise !== undefined) {
+            playPromise.then(function() {
+                isPlaying = true;
+                updatePlayButton();
+                console.log('Enhanced audio playback started successfully');
+                
+                // Show success message briefly
+                showAudioSuccessMessage();
+            }).catch(function(e) {
+                console.warn('Enhanced playback failed:', e);
+                showAudioErrorMessage();
+            });
+        } else {
+            // Fallback for older browsers
+            try {
+                track.play();
+                isPlaying = true;
+                updatePlayButton();
+                console.log('Enhanced audio playback started (fallback)');
+                showAudioSuccessMessage();
+            } catch(e) {
+                console.warn('Enhanced playback failed (fallback):', e);
+                showAudioErrorMessage();
+            }
+        }
+    }
+    
+    function showAudioSuccessMessage() {
+        var successMsg = document.createElement('div');
+        successMsg.style.cssText = `
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 10005;
+            box-shadow: 0 8px 20px rgba(76,175,80,0.3);
+            animation: slideUpFade 0.3s ease-out;
+        `;
+        successMsg.textContent = '🎵 Nhạc đã được bật thành công!';
+        document.body.appendChild(successMsg);
+        
+        setTimeout(function() {
+            if (successMsg.parentNode) {
+                successMsg.style.opacity = '0';
+                successMsg.style.transform = 'translateX(-50%) translateY(-10px)';
+                setTimeout(function() {
+                    if (successMsg.parentNode) {
+                        successMsg.parentNode.removeChild(successMsg);
+                    }
+                }, 300);
+            }
+        }, 3000);
+    }
+    
+    function showAudioErrorMessage() {
+        var errorMsg = document.createElement('div');
+        errorMsg.style.cssText = `
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 107, 107, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 10005;
+            box-shadow: 0 8px 20px rgba(255,107,107,0.3);
+            animation: slideUpFade 0.3s ease-out;
+        `;
+        errorMsg.textContent = '❌ Không thể phát nhạc. Vui lòng kiểm tra cài đặt âm thanh.';
+        document.body.appendChild(errorMsg);
+        
+        setTimeout(function() {
+            if (errorMsg.parentNode) {
+                errorMsg.style.opacity = '0';
+                errorMsg.style.transform = 'translateX(-50%) translateY(-10px)';
+                setTimeout(function() {
+                    if (errorMsg.parentNode) {
+                        errorMsg.parentNode.removeChild(errorMsg);
+                    }
+                }, 300);
+            }
+        }, 5000);
+    }
+
     // ===== Mobile Audio Prompt Functions =====
     function showMobileAudioPrompt() {
         // Create a mobile-friendly audio prompt
@@ -569,8 +819,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (audioCtx) return Promise.resolve();
         try {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            // Don't auto-resume audio context - wait for password validation
-            console.log('Audio context created, waiting for password validation');
+            console.log('Audio context created, state:', audioCtx.state);
+            
+            // Handle Safari's autoplay policy more gracefully
+            if (audioCtx.state === 'suspended') {
+                console.log('Audio context suspended - will resume on user interaction');
+            }
         } catch(e) {
             console.warn('Audio not supported:', e);
             return Promise.resolve();
@@ -814,6 +1068,11 @@ function createAudioElements(tracks) {
         audio.volume = 0.7;
         audio.playsInline = true; // Critical for iOS Safari
         audio.muted = false; // Explicitly set
+        audio.crossOrigin = 'anonymous'; // For better compatibility
+        
+        // Enhanced Safari compatibility
+        audio.setAttribute('webkit-playsinline', 'true');
+        audio.setAttribute('playsinline', 'true');
         
         // Store reference
         musicTracks[trackName] = audio;
@@ -860,19 +1119,48 @@ function playCurrentTrack() {
         // Set volume to default
         track.volume = 0.7;
         
-        // Try to play the track
-        track.play().then(function() {
-            isPlaying = true;
-            updatePlayButton();
-            hideMobileAudioPrompt();
-            console.log('Music started playing');
-        }).catch(function(e) {
-            console.warn('Could not play track:', e);
-            // On mobile, show the audio prompt
-            if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                showMobileAudioPrompt();
+        // Enhanced play handling for Safari and mobile
+        var playPromise = track.play();
+        
+        if (playPromise !== undefined) {
+            playPromise.then(function() {
+                isPlaying = true;
+                updatePlayButton();
+                hideMobileAudioPrompt();
+                hideEnhancedAudioPrompt();
+                console.log('Music started playing successfully');
+            }).catch(function(e) {
+                console.warn('Could not play track:', e);
+                handlePlaybackError();
+            });
+        } else {
+            // Fallback for older browsers
+            try {
+                track.play();
+                isPlaying = true;
+                updatePlayButton();
+                hideMobileAudioPrompt();
+                hideEnhancedAudioPrompt();
+                console.log('Music started playing (fallback)');
+            } catch(e) {
+                console.warn('Could not play track (fallback):', e);
+                handlePlaybackError();
             }
-        });
+        }
+    }
+}
+
+function handlePlaybackError() {
+    // Detect Safari specifically
+    var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    var isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isSafari || isMobile) {
+        console.log('Showing enhanced audio prompt for Safari/Mobile');
+        showEnhancedAudioPrompt();
+    } else {
+        // For other browsers, show mobile prompt as fallback
+        showMobileAudioPrompt();
     }
 }
 

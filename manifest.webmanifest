@@ -1,0 +1,74 @@
+{
+    "name": "Hành Trình Tình Yêu - Tùng Phạm & Bảo Ly",
+    "short_name": "Baolytungpham",
+    "description": "Những kỷ niệm đẹp và khoảnh khắc đáng giá trong hành trình tình yêu",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#FFF8F0",
+    "theme_color": "#E8A0BF",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "lang": "vi",
+    "dir": "ltr",
+    "icons": [
+        {
+            "src": "/img/favicon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/img/favicon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/img/favicon-144x144.png",
+            "sizes": "144x144",
+            "type": "image/png"
+        },
+        {
+            "src": "/img/favicon-96x96.png",
+            "sizes": "96x96",
+            "type": "image/png"
+        },
+        {
+            "src": "/img/favicon-72x72.png",
+            "sizes": "72x72",
+            "type": "image/png"
+        },
+        {
+            "src": "/img/favicon-48x48.png",
+            "sizes": "48x48",
+            "type": "image/png"
+        },
+        {
+            "src": "/img/favicon-32x32.png",
+            "sizes": "32x32",
+            "type": "image/png"
+        },
+        {
+            "src": "/img/favicon-16x16.png",
+            "sizes": "16x16",
+            "type": "image/png"
+        }
+    ],
+    "categories": ["lifestyle", "personal", "photography"],
+    "screenshots": [
+        {
+            "src": "/img/screenshot-desktop.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Desktop view of the love story timeline"
+        },
+        {
+            "src": "/img/screenshot-mobile.png",
+            "sizes": "375x667",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "Mobile view of the love story timeline"
+        }
+    ]
+}
