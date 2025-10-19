@@ -658,6 +658,61 @@ document.addEventListener('DOMContentLoaded', function () {
     // Add global event listeners for audio enablement
     document.addEventListener('click', enableAudioOnFirstInteraction, { once: true });
     document.addEventListener('touchstart', enableAudioOnFirstInteraction, { once: true });
+    
+    // ===== Enhanced Mobile Audio System =====
+    var audioUnlocked = false;
+    var audioUnlockAttempted = false;
+    
+    function unlockAudioForMobile() {
+        if (audioUnlocked || audioUnlockAttempted) return;
+        audioUnlockAttempted = true;
+        
+        // Try to unlock all audio elements
+        Object.values(musicTracks).forEach(function(audio) {
+            if (audio && typeof audio.play === 'function') {
+                // Temporarily mute and try to play
+                var wasMuted = audio.muted;
+                audio.muted = true;
+                audio.play().then(function() {
+                    audio.muted = wasMuted;
+                    audioUnlocked = true;
+                    console.log('Audio unlocked successfully');
+                    hideMobileAudioPrompt();
+                }).catch(function(e) {
+                    audio.muted = wasMuted;
+                    console.log('Audio unlock failed:', e);
+                });
+            }
+        });
+    }
+    
+    // Try to unlock audio on any user interaction
+    function attemptAudioUnlock() {
+        if (!audioUnlocked) {
+            unlockAudioForMobile();
+        }
+    }
+    
+    // Add multiple event listeners for better mobile support
+    var unlockEvents = ['click', 'touchstart', 'touchend', 'keydown', 'mousedown'];
+    unlockEvents.forEach(function(event) {
+        document.addEventListener(event, attemptAudioUnlock, { once: true, passive: true });
+    });
+    
+    // Handle visibility change (when user returns to tab)
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden && audioUnlocked && isPlaying) {
+            // Reattempt playback when tab becomes visible
+            setTimeout(function() {
+                var track = getCurrentTrackElement();
+                if (track && track.paused) {
+                    track.play().catch(function(e) {
+                        console.log('Replay failed after visibility change:', e);
+                    });
+                }
+            }, 100);
+        }
+    });
     function playClickSound(freq) {
         if (!audioCtx) return;
         var now = audioCtx.currentTime;
@@ -890,9 +945,11 @@ function createAudioElements(tracks) {
         var audio = document.createElement('audio');
         audio.id = trackName.replace('.mp3', '').replace('music', 'music-track');
         audio.src = 'music/' + trackName;
-        audio.preload = 'auto';
+        audio.preload = 'metadata'; // Changed from 'auto' for better mobile performance
         audio.loop = true;
         audio.volume = 0.7;
+        audio.playsInline = true; // Critical for iOS Safari
+        audio.muted = false; // Explicitly set
         
         // Store reference
         musicTracks[trackName] = audio;
@@ -970,17 +1027,42 @@ function playCurrentTrack() {
     pauseAllMusic();
     var track = getCurrentTrackElement();
     if (track) {
-        track.play().then(function() {
-            isPlaying = true;
-            updatePlayButton();
-            hideMobileAudioPrompt(); // Hide any existing prompts
-        }).catch(function(e) {
-            console.warn('Could not play track:', e);
-            // On mobile, show the audio prompt
-            if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                showMobileAudioPrompt();
-            }
-        });
+        // If audio is not unlocked yet, try to unlock first
+        if (!audioUnlocked) {
+            unlockAudioForMobile();
+            // Wait a bit and try again
+            setTimeout(function() {
+                if (audioUnlocked) {
+                    track.play().then(function() {
+                        isPlaying = true;
+                        updatePlayButton();
+                        hideMobileAudioPrompt();
+                    }).catch(function(e) {
+                        console.warn('Could not play track after unlock:', e);
+                        if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                            showMobileAudioPrompt();
+                        }
+                    });
+                } else {
+                    // Still not unlocked, show prompt
+                    if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                        showMobileAudioPrompt();
+                    }
+                }
+            }, 100);
+        } else {
+            // Audio is unlocked, play normally
+            track.play().then(function() {
+                isPlaying = true;
+                updatePlayButton();
+                hideMobileAudioPrompt();
+            }).catch(function(e) {
+                console.warn('Could not play track:', e);
+                if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                    showMobileAudioPrompt();
+                }
+            });
+        }
     }
 }
 
