@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const enteredPassword = passwordInput.value.trim();
         
         if (validPasswords.includes(enteredPassword)) {
-            // Prepare audio playback to satisfy iOS Safari gesture requirement
+            // Prepare audio playback to satisfy mobile browser gesture requirement
             try {
                 if (typeof ensureAudio === 'function') {
                     ensureAudio().then(function(){
@@ -52,7 +52,10 @@ document.addEventListener('DOMContentLoaded', function () {
                                     isPlaying = true;
                                     if (typeof updatePlayButton === 'function') updatePlayButton();
                                     // restore previous volume after loader completes in finishLoading()
-                                }).catch(function(){ /* ignore; finishLoading will prompt for gesture if needed */ });
+                                }).catch(function(){ 
+                                    // Mobile browsers block autoplay - will handle in finishLoading
+                                    console.log('Audio autoplay blocked - will require user interaction');
+                                });
                             }
                         }
                     });
@@ -150,18 +153,11 @@ document.addEventListener('DOMContentLoaded', function () {
                                 p.then(function(){
                                     isPlaying = true;
                                     updatePlayButton();
+                                    // Hide any mobile audio prompt if it exists
+                                    hideMobileAudioPrompt();
                                 }).catch(function(){
-                                    // Autoplay was prevented, prompt user with a single interaction
-                                    var once = function(){
-                                        track.play().then(function(){
-                                            isPlaying = true;
-                                            updatePlayButton();
-                                        });
-                                        document.removeEventListener('click', once);
-                                        document.removeEventListener('touchstart', once);
-                                    };
-                                    document.addEventListener('click', once, { once: true });
-                                    document.addEventListener('touchstart', once, { once: true });
+                                    // Autoplay was prevented, show mobile-friendly prompt
+                                    showMobileAudioPrompt();
                                 });
                             }
                         }
@@ -428,6 +424,119 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     
+    // ===== Mobile Audio Prompt Functions =====
+    function showMobileAudioPrompt() {
+        // Create a mobile-friendly audio prompt
+        var prompt = document.createElement('div');
+        prompt.id = 'mobile-audio-prompt';
+        prompt.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            border: 2px solid rgba(232,160,191,0.3);
+            z-index: 10003;
+            max-width: 320px;
+            width: 90%;
+        `;
+        
+        prompt.innerHTML = `
+            <div style="font-size: 2rem; margin-bottom: 12px;">🎵</div>
+            <h3 style="font-family: var(--heading-font); color: #7a6071; margin-bottom: 12px; font-size: 1.2rem;">Bật nhạc nền</h3>
+            <p style="color: #7a6071; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.4;">Nhấn để bật nhạc nền cho trải nghiệm tốt nhất</p>
+            <button id="enable-audio-btn" style="
+                background: linear-gradient(135deg, #E8A0BF, #BFA0E8);
+                color: white;
+                border: none;
+                border-radius: 25px;
+                padding: 12px 24px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                box-shadow: 0 8px 20px rgba(232,160,191,0.3);
+                transition: all 0.3s ease;
+            ">Bật nhạc</button>
+        `;
+        
+        document.body.appendChild(prompt);
+        
+        // Add click handler
+        var enableBtn = document.getElementById('enable-audio-btn');
+        enableBtn.addEventListener('click', function() {
+            enableAudioOnMobile();
+        });
+        
+        // Auto-hide after 10 seconds
+        setTimeout(function() {
+            if (document.getElementById('mobile-audio-prompt')) {
+                hideMobileAudioPrompt();
+            }
+        }, 10000);
+    }
+    
+    function hideMobileAudioPrompt() {
+        var prompt = document.getElementById('mobile-audio-prompt');
+        if (prompt) {
+            prompt.style.opacity = '0';
+            prompt.style.transform = 'translate(-50%, -50%) scale(0.9)';
+            setTimeout(function() {
+                if (prompt.parentNode) {
+                    prompt.parentNode.removeChild(prompt);
+                }
+            }, 300);
+        }
+    }
+    
+    function enableAudioOnMobile() {
+        hideMobileAudioPrompt();
+        
+        // Try to play current track
+        var track = getCurrentTrackElement();
+        if (track) {
+            track.volume = 0.7;
+            track.play().then(function() {
+                isPlaying = true;
+                updatePlayButton();
+                console.log('Audio enabled successfully on mobile');
+            }).catch(function(e) {
+                console.warn('Still cannot play audio:', e);
+                // Show a more persistent message
+                showAudioError();
+            });
+        }
+    }
+    
+    function showAudioError() {
+        var errorMsg = document.createElement('div');
+        errorMsg.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 107, 107, 0.9);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            z-index: 10004;
+            box-shadow: 0 8px 20px rgba(255,107,107,0.3);
+        `;
+        errorMsg.textContent = 'Không thể phát nhạc. Vui lòng kiểm tra cài đặt âm thanh.';
+        document.body.appendChild(errorMsg);
+        
+        setTimeout(function() {
+            if (errorMsg.parentNode) {
+                errorMsg.parentNode.removeChild(errorMsg);
+            }
+        }, 5000);
+    }
+
     // ===== Pleasant click sound for interactive elements =====
     var audioCtx; var clickBuffer;
     function ensureAudio() {
@@ -767,8 +876,13 @@ function playCurrentTrack() {
         track.play().then(function() {
             isPlaying = true;
             updatePlayButton();
+            hideMobileAudioPrompt(); // Hide any existing prompts
         }).catch(function(e) {
             console.warn('Could not play track:', e);
+            // On mobile, show the audio prompt
+            if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                showMobileAudioPrompt();
+            }
         });
     }
 }
