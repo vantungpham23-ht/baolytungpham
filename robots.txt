@@ -1,7 +1,6 @@
 User-agent: *
 Allow: /
 
-# Sitemap
 Sitemap: https://baolytungpham.space/sitemap.xml
 
 # Crawl-delay for respectful crawling
