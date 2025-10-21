@@ -471,6 +471,136 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     
+    // Navigation link handlers
+    var navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            var href = this.getAttribute('href');
+            
+            if (href === '#letter') {
+                e.preventDefault();
+                openAllLettersAndShowFinalLetter();
+            } else if (href === '#timeline') {
+                e.preventDefault();
+                scrollToTimeline();
+            } else if (href === '#album') {
+                e.preventDefault();
+                openSliderPopup();
+            }
+        });
+    });
+    
+    function openAllLettersAndShowFinalLetter() {
+        // First, open all timeline letters
+        var timelineItems = document.querySelectorAll('.timeline-item.is-locked');
+        var openedCount = 0;
+        
+        timelineItems.forEach(function(item, index) {
+            setTimeout(function() {
+                // Simulate clicking the open button
+                var button = item.querySelector('.open-btn');
+                if (button) {
+                    button.click();
+                    openedCount++;
+                    
+                    // If this is the last item, show final letter after a delay
+                    if (openedCount === timelineItems.length) {
+                        setTimeout(function() {
+                            showFinalLetter();
+                        }, 1000);
+                    }
+                }
+            }, index * 200); // Stagger the opening with 200ms delay between each
+        });
+        
+        // If no locked items, just show final letter
+        if (timelineItems.length === 0) {
+            showFinalLetter();
+        }
+    }
+    
+    function showFinalLetter() {
+        // Scroll to bottom smoothly
+        window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: 'smooth'
+        });
+        
+        // Show the final letter popup after scrolling
+        setTimeout(function() {
+            var letterPopup = document.getElementById('celebration-popup');
+            if (letterPopup) {
+                letterPopup.classList.add('show');
+                letterPopup.setAttribute('aria-hidden', 'false');
+                
+                // gentle chime on open
+                try {
+                    if (!audioCtx) { ensureAudio().then(function(){ if (window.playChime) { playChime(); } }); }
+                    else { if (window.playChime) { playChime(); } }
+                } catch(_){}
+            }
+        }, 800);
+    }
+    
+    function scrollToTimeline() {
+        var timeline = document.getElementById('timeline');
+        if (timeline) {
+            timeline.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    }
+    
+    function openSliderPopup() {
+        // First, open all timeline letters
+        var timelineItems = document.querySelectorAll('.timeline-item.is-locked');
+        var openedCount = 0;
+        
+        if (timelineItems.length > 0) {
+            // Open all letters first
+            timelineItems.forEach(function(item, index) {
+                setTimeout(function() {
+                    // Simulate clicking the open button
+                    var button = item.querySelector('.open-btn');
+                    if (button) {
+                        button.click();
+                        openedCount++;
+                        
+                        // If this is the last item, open album after a delay
+                        if (openedCount === timelineItems.length) {
+                            setTimeout(function() {
+                                showAlbumPopup();
+                            }, 1000);
+                        }
+                    }
+                }, index * 150); // Stagger the opening with 150ms delay between each
+            });
+        } else {
+            // If no locked items, just open album directly
+            showAlbumPopup();
+        }
+    }
+    
+    function showAlbumPopup() {
+        var sliderPopup = document.getElementById('slider-popup');
+        if (sliderPopup) {
+            sliderPopup.classList.add('show');
+            sliderPopup.setAttribute('aria-hidden', 'false');
+            // Title animation restarts by reflow
+            var title = sliderPopup.querySelector('.slider-popup-title');
+            if (title) { title.style.animation = 'none'; title.offsetHeight; title.style.animation = ''; }
+            spawnParticles(sliderPopup);
+            // gentle chime on open
+            try {
+                if (!audioCtx) { ensureAudio().then(function(){ if (window.playChime) { playChime(); } else { /* will define later */ } }); }
+                else { if (window.playChime) { playChime(); } }
+            } catch(_){}
+            // refresh AOS if needed
+            if (window.AOS && AOS.refreshHard) { AOS.refreshHard(); } else if (window.AOS) { AOS.refresh(); }
+        }
+    }
+    
     // ===== Enhanced Audio Prompt Functions =====
     function showEnhancedAudioPrompt() {
         // Create an enhanced audio prompt specifically for Safari and mobile
@@ -898,6 +1028,48 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     attachClickSounds();
 
+    // ===== Scroll to Top Button =====
+    var scrollToTopBtn = document.getElementById('scroll-to-top');
+    if (scrollToTopBtn) {
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                scrollToTopBtn.classList.add('show');
+            } else {
+                scrollToTopBtn.classList.remove('show');
+            }
+        });
+        
+        // Scroll to top when clicked
+        scrollToTopBtn.addEventListener('click', function() {
+            // Smooth scroll to top
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            
+            // Play click sound
+            try {
+                if (!audioCtx) { ensureAudio().then(function(){ playClickSound(440); }); }
+                else { playClickSound(440); }
+            } catch(_){}
+        });
+        
+        // Add ripple effect
+        scrollToTopBtn.classList.add('ripple-container');
+        scrollToTopBtn.addEventListener('click', function(e){
+            var r = document.createElement('span');
+            r.className = 'ripple';
+            var rect = scrollToTopBtn.getBoundingClientRect();
+            var x = e.clientX - rect.left; 
+            var y = e.clientY - rect.top;
+            r.style.left = x + 'px'; 
+            r.style.top = y + 'px';
+            scrollToTopBtn.appendChild(r);
+            setTimeout(function(){ if (r.parentNode) r.parentNode.removeChild(r); }, 700);
+        });
+    }
+
     // ===== Cursor trail animation =====
     (function initCursorTrail(){
         var trailRoot = document.querySelector('.cursor-trail');
@@ -952,7 +1124,7 @@ document.addEventListener('DOMContentLoaded', function () {
     for (var i = 1; i <= maxIndex; i++) {
         for (var b = 0; b < bases.length; b++) {
             for (var e = 0; e < exts.length; e++) {
-                urls.push('img/slide/' + bases[b] + '-' + i + '.' + exts[e]);
+                urls.push('/img/slide/' + bases[b] + '-' + i + '.' + exts[e]);
             }
         }
     }
@@ -960,7 +1132,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Also probe raw numbers (1..maxIndex) without base
     for (var j = 1; j <= maxIndex; j++) {
         for (var ee = 0; ee < exts.length; ee++) {
-            urls.push('img/slide/' + j + '.' + exts[ee]);
+            urls.push('/img/slide/' + j + '.' + exts[ee]);
         }
     }
 
@@ -1067,12 +1239,51 @@ function createAudioElements(tracks) {
         var baseUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '');
         audio.src = baseUrl + '/music/' + trackName;
         
-        audio.preload = 'metadata'; // Changed from 'auto' for better mobile performance
+        audio.preload = 'auto'; // Changed back to 'auto' for Safari mobile
         audio.loop = true;
         audio.volume = 0.7;
         audio.playsInline = true; // Critical for iOS Safari
         audio.muted = false; // Explicitly set
         audio.crossOrigin = 'anonymous'; // For better compatibility
+        
+        // Safari mobile specific settings
+        audio.setAttribute('webkit-playsinline', 'true');
+        audio.setAttribute('playsinline', 'true');
+        audio.setAttribute('controls', 'false');
+        audio.setAttribute('disablePictureInPicture', 'true');
+        
+        // Prevent Safari from pausing audio
+        audio.addEventListener('pause', function(e) {
+            if (!e.target.paused) return; // If not actually paused, ignore
+            console.log('Audio paused by Safari, attempting to resume...');
+            setTimeout(function() {
+                if (audio.paused && isPlaying) {
+                    audio.play().catch(function(err) {
+                        console.warn('Failed to resume audio:', err);
+                    });
+                }
+            }, 100);
+        });
+        
+        // Handle audio interruption
+        audio.addEventListener('suspend', function() {
+            console.log('Audio suspended by Safari');
+        });
+        
+        audio.addEventListener('canplay', function() {
+            console.log('Audio can play:', trackName);
+        });
+        
+        // Keep audio alive on Safari mobile
+        audio.addEventListener('timeupdate', function() {
+            // Prevent Safari from suspending audio
+            if (audio.currentTime > 0 && audio.paused && isPlaying) {
+                console.log('Audio paused unexpectedly, resuming...');
+                audio.play().catch(function(err) {
+                    console.warn('Failed to resume paused audio:', err);
+                });
+            }
+        });
         
         // Enhanced Safari compatibility
         audio.setAttribute('webkit-playsinline', 'true');
@@ -1085,9 +1296,9 @@ function createAudioElements(tracks) {
             console.warn('Network state:', audio.networkState);
             console.warn('Ready state:', audio.readyState);
             
-            // Try fallback with relative path
+            // Try fallback with absolute path
             if (audio.src.includes('/music/')) {
-                audio.src = './music/' + trackName;
+                audio.src = '/music/' + trackName;
                 console.log('Trying fallback path:', audio.src);
             }
         });
@@ -1186,6 +1397,16 @@ function playCurrentTrack() {
 }
 
 function playTrackDirectly(track) {
+    // Safari mobile optimization
+    var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    var isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isSafari && isMobile) {
+        // Set slightly higher volume for Safari mobile to prevent auto-pause
+        track.volume = 0.8;
+        console.log('Safari mobile detected, using optimized audio settings');
+    }
+    
     // Enhanced play handling for Safari and mobile
     var playPromise = track.play();
     
@@ -1196,6 +1417,13 @@ function playTrackDirectly(track) {
             hideMobileAudioPrompt();
             hideEnhancedAudioPrompt();
             console.log('Music started playing successfully');
+            
+            // Safari mobile: Gradually increase volume to prevent interruption
+            if (isSafari && isMobile) {
+                setTimeout(function() {
+                    track.volume = 0.7; // Return to normal volume
+                }, 2000);
+            }
         }).catch(function(e) {
             console.warn('Could not play track:', e);
             handlePlaybackError();
@@ -1258,10 +1486,199 @@ function updatePlayButton() {
     }
 }
 
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initMusicPlayer);
-} else {
-    initMusicPlayer();
-}
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMusicPlayer);
+    } else {
+        initMusicPlayer();
+    }
+    
+    // Safari mobile audio keep-alive system
+    function initSafariAudioKeepAlive() {
+        var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        var isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isSafari && isMobile) {
+            console.log('Initializing Safari mobile audio keep-alive system');
+            
+            // Keep audio context alive
+            var keepAliveInterval = setInterval(function() {
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    console.log('Audio context suspended, attempting to resume...');
+                    audioCtx.resume().catch(function(e) {
+                        console.warn('Failed to resume audio context:', e);
+                    });
+                }
+                
+                // Check if current track is paused unexpectedly
+                var currentTrack = getCurrentTrackElement();
+                if (currentTrack && isPlaying && currentTrack.paused) {
+                    console.log('Track paused unexpectedly, attempting to resume...');
+                    currentTrack.play().catch(function(e) {
+                        console.warn('Failed to resume track:', e);
+                    });
+                }
+            }, 5000); // Check every 5 seconds
+            
+            // Clean up interval when page unloads
+            window.addEventListener('beforeunload', function() {
+                clearInterval(keepAliveInterval);
+            });
+            
+            // Additional user interaction handlers for Safari
+            var userInteractionEvents = ['touchstart', 'touchend', 'click', 'keydown'];
+            userInteractionEvents.forEach(function(eventType) {
+                document.addEventListener(eventType, function() {
+                    if (audioCtx && audioCtx.state === 'suspended') {
+                        audioCtx.resume().catch(function(e) {
+                            console.warn('Failed to resume audio context on user interaction:', e);
+                        });
+                    }
+                }, { once: false, passive: true });
+            });
+        }
+    }
+    
+    // Initialize Safari keep-alive system
+    initSafariAudioKeepAlive();
+    
+    // ===== Open All Memories Functionality =====
+    var openAllMemoriesBtn = document.getElementById('open-all-memories-btn');
+    if (openAllMemoriesBtn) {
+        openAllMemoriesBtn.addEventListener('click', function() {
+            openAllMemoriesAndScrollToBottom();
+        });
+        
+        // Add ripple effect
+        openAllMemoriesBtn.classList.add('ripple-container');
+        openAllMemoriesBtn.addEventListener('click', function(e){
+            var r = document.createElement('span');
+            r.className = 'ripple';
+            var rect = openAllMemoriesBtn.getBoundingClientRect();
+            var x = e.clientX - rect.left; 
+            var y = e.clientY - rect.top;
+            r.style.left = x + 'px'; 
+            r.style.top = y + 'px';
+            openAllMemoriesBtn.appendChild(r);
+            setTimeout(function(){ if (r.parentNode) r.parentNode.removeChild(r); }, 700);
+        });
+    }
+    
+    function openAllMemoriesAndScrollToBottom() {
+        // First, open all existing letters
+        var timelineItems = document.querySelectorAll('.timeline-item.is-locked');
+        var openedCount = 0;
+        
+        if (timelineItems.length > 0) {
+            // Open all existing letters first
+            timelineItems.forEach(function(item, index) {
+                setTimeout(function() {
+                    var button = item.querySelector('.open-btn');
+                    if (button) {
+                        button.click();
+                        openedCount++;
+                        
+                        // After opening all letters, scroll to bottom
+                        if (openedCount === timelineItems.length) {
+                            setTimeout(function() {
+                                scrollToBottomAndShowFinalMessage();
+                            }, 1000);
+                        }
+                    }
+                }, index * 150);
+            });
+        } else {
+            // If no locked items, scroll to bottom directly
+            scrollToBottomAndShowFinalMessage();
+        }
+        
+        // Play click sound
+        try {
+            if (!audioCtx) { ensureAudio().then(function(){ playClickSound(550); }); }
+            else { playClickSound(550); }
+        } catch(_){}
+    }
+    
+    function scrollToBottomAndShowFinalMessage() {
+        // Scroll to bottom smoothly
+        window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: 'smooth'
+        });
+        
+        // Show the final message after scrolling
+        setTimeout(function() {
+            var finalMessage = document.querySelector('.final-message');
+            if (finalMessage) {
+                finalMessage.classList.add('show');
+            }
+            
+            // Show celebration popup after a delay
+            setTimeout(function() {
+                showCelebrationPopup();
+            }, 500);
+        }, 800);
+        
+        // Show success message
+        showAllMemoriesOpenedMessage();
+    }
+    
+    function showAllMemoriesOpenedMessage() {
+        var successMsg = document.createElement('div');
+        successMsg.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(232, 160, 191, 0.95);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            z-index: 10006;
+            box-shadow: 0 10px 30px rgba(232,160,191,0.4);
+            animation: memoryAddedSlideIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            text-align: center;
+        `;
+        successMsg.innerHTML = `
+            <div style="font-size: 2rem; margin-bottom: 10px;">💌</div>
+            <div>Tất cả kỷ niệm đã được mở!</div>
+            <div style="font-size: 0.9rem; margin-top: 8px; opacity: 0.9;">Hành trình tình yêu của chúng ta</div>
+        `;
+        document.body.appendChild(successMsg);
+        
+        setTimeout(function() {
+            if (successMsg.parentNode) {
+                successMsg.style.opacity = '0';
+                successMsg.style.transform = 'translate(-50%, -50%) scale(0.9)';
+                setTimeout(function() {
+                    if (successMsg.parentNode) {
+                        successMsg.parentNode.removeChild(successMsg);
+                    }
+                }, 300);
+            }
+        }, 3000);
+    }
+    
+    
+    // Add CSS for memory added animation
+    var style = document.createElement('style');
+    style.textContent = `
+        @keyframes memoryAddedSlideIn {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.7) translateY(20px);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.05) translateY(-5px);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) translateY(0);
+            }
+        }
+    `;
+    document.head.appendChild(style);
 

@@ -21,6 +21,43 @@ html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
+    /* Hide scrollbar for all browsers */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+html::-webkit-scrollbar {
+    display: none; /* WebKit browsers (Chrome, Safari, Edge) */
+}
+
+body {
+    font-family: var(--body-font);
+    background:
+        radial-gradient(1200px 800px at 10% -10%, rgba(232, 160, 191, 0.15), transparent 60%),
+        radial-gradient(1000px 700px at 110% 10%, rgba(191, 160, 232, 0.12), transparent 60%),
+        radial-gradient(900px 600px at 50% 120%, rgba(160, 232, 191, 0.10), transparent 60%),
+        var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    /* Hide scrollbar for all browsers */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+body::-webkit-scrollbar {
+    display: none; /* WebKit browsers (Chrome, Safari, Edge) */
+}
+
+/* Hide scrollbar for all elements */
+* {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+*::-webkit-scrollbar {
+    display: none; /* WebKit browsers (Chrome, Safari, Edge) */
 }
 
 /* Critical CSS for above-the-fold content */
@@ -81,18 +118,6 @@ html {
     line-height: 1.6;
 }
 
-body {
-    font-family: var(--body-font);
-    background:
-        radial-gradient(1200px 800px at 10% -10%, rgba(232, 160, 191, 0.15), transparent 60%),
-        radial-gradient(1000px 700px at 110% 10%, rgba(191, 160, 232, 0.12), transparent 60%),
-        radial-gradient(900px 600px at 50% 120%, rgba(160, 232, 191, 0.10), transparent 60%),
-        var(--bg-color);
-    color: var(--text-color);
-    line-height: 1.6;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-}
 /* ===== Simple Music Player ===== */
 .simple-music-player {
     position: fixed;
@@ -639,6 +664,13 @@ body {
     max-width: 1100px;
     margin: 0 auto;
     padding: 0 30px;
+    /* Hide scrollbar */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.container::-webkit-scrollbar {
+    display: none; /* WebKit browsers */
 }
 
 
@@ -679,21 +711,30 @@ body {
 /* Timeline */
 .timeline {
     position: relative;
-    padding: 50px 0;
+    padding: 80px 0 50px 0; /* Add more top padding to create space from title */
     z-index: 1;
     flex: 1 0 auto; /* allow main to grow and push footer */
+    /* Hide scrollbar */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
 }
 
-/* The central line */
+.timeline::-webkit-scrollbar {
+    display: none; /* WebKit browsers */
+}
+
+/* The central line - HIDDEN */
 .timeline::before {
     content: '';
     position: absolute;
-    top: 0;
+    top: 60px; /* Start line after the title section */
     left: 50%;
     width: 2px;
-    height: 100%;
+    height: calc(100% - 60px); /* Adjust height to start after title */
     background: var(--line-color);
     transform: translateX(-50%);
+    z-index: 0; /* Ensure it's behind content */
+    display: none; /* Hide the timeline line */
 }
 
 .timeline-item {
@@ -705,7 +746,7 @@ body {
 
 .timeline-item.hidden { display: none; }
 
-/* The circle on the timeline */
+/* The circle on the timeline - HIDDEN */
 .timeline-item::after {
     content: '';
     position: absolute;
@@ -716,12 +757,13 @@ body {
     border: 4px solid var(--primary-color);
     border-radius: 50%;
     z-index: 1;
+    display: none; /* Hide the timeline circles */
 }
 
 /* Left-side items */
 .timeline-item:nth-child(odd) {
     left: 0;
-    padding-right: 60px; /* Space for the circle */
+    padding-right: 40px; /* Reduced padding since no circle */
 }
 
 .timeline-item:nth-child(odd)::after {
@@ -731,7 +773,7 @@ body {
 /* Right-side items */
 .timeline-item:nth-child(even) {
     left: 50%;
-    padding-left: 60px; /* Space for the circle */
+    padding-left: 40px; /* Reduced padding since no circle */
 }
 
 .timeline-item:nth-child(even)::after {
@@ -994,6 +1036,7 @@ body {
     transform: translateY(0);
 }
 
+.final-message h2,
 .final-message h3 {
     font-family: var(--heading-font);
     font-size: 2.8rem;
@@ -1110,6 +1153,7 @@ body {
     .open-btn { padding: 12px 20px; }
 
     .final-message { padding: 56px 0; }
+    .final-message h2,
     .final-message h3 { font-size: 2rem; }
     .final-message p { font-size: 1rem; }
 
@@ -1133,11 +1177,14 @@ body {
 
     .timeline::before {
         left: 30px;
+        top: 60px; /* Start line after title on mobile too */
+        height: calc(100% - 60px);
+        display: none; /* Hide timeline line on mobile too */
     }
 
     .timeline-item {
         width: 100%;
-        padding-left: 70px;
+        padding-left: 40px; /* Reduced padding since no circle */
         padding-right: 25px;
     }
 
@@ -1155,14 +1202,15 @@ body {
     .header h1 { font-size: 1.9rem; }
     .header p { font-size: 0.95rem; }
 
-    .timeline::before { left: 22px; }
-    .timeline-item { padding-left: 56px; padding-right: 16px; }
+    .timeline::before { left: 22px; top: 60px; height: calc(100% - 60px); }
+    .timeline-item { padding-left: 40px; padding-right: 16px; }
     .timeline-item::after { left: 14px; width: 16px; height: 16px; }
 
     .timeline-content { padding: 14px 14px; }
     .timeline-content h3 { font-size: 1.15rem; }
     .timeline-date { font-size: 0.85rem; }
 
+    .final-message h2,
     .final-message h3 { font-size: 1.7rem; }
     .final-message p { font-size: 0.95rem; }
     
@@ -1300,6 +1348,7 @@ body { -webkit-tap-highlight-color: rgba(0,0,0,0); }
     .open-btn { padding: 12px 20px; }
 
     .final-message { padding: 56px 0; }
+    .final-message h2,
     .final-message h3 { font-size: 2rem; }
     .final-message p { font-size: 1rem; }
 
@@ -1322,14 +1371,15 @@ body { -webkit-tap-highlight-color: rgba(0,0,0,0); }
     .header h1 { font-size: 1.9rem; }
     .header p { font-size: 0.95rem; }
 
-    .timeline::before { left: 22px; }
-    .timeline-item { padding-left: 56px; padding-right: 16px; }
+    .timeline::before { left: 22px; top: 60px; height: calc(100% - 60px); }
+    .timeline-item { padding-left: 40px; padding-right: 16px; }
     .timeline-item::after { left: 14px; width: 16px; height: 16px; }
 
     .timeline-content { padding: 14px 14px; }
     .timeline-content h3 { font-size: 1.15rem; }
     .timeline-date { font-size: 0.85rem; }
 
+    .final-message h2,
     .final-message h3 { font-size: 1.7rem; }
     .final-message p { font-size: 0.95rem; }
     
@@ -1594,6 +1644,181 @@ button, [role="button"], .open-btn, #password-submit, .close-popup, .audio-btn {
     100% {
         opacity: 1;
         transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* ===== Add New Memory Button ===== */
+.add-memory-section {
+    text-align: center;
+    padding: 60px 0;
+    margin-top: 40px;
+}
+
+.add-memory-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.add-memory-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #E8A0BF, #BFA0E8);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 18px 36px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 12px 30px rgba(232,160,191,0.4);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.add-memory-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 16px 40px rgba(232,160,191,0.5);
+    background: linear-gradient(135deg, #F0A8C8, #C8A8F0);
+}
+
+.add-memory-btn:active {
+    transform: translateY(-1px) scale(1.02);
+}
+
+.add-icon {
+    font-size: 1.5rem;
+    animation: sparkle 2s ease-in-out infinite;
+}
+
+.add-text {
+    font-family: var(--body-font);
+    font-weight: 700;
+}
+
+.add-memory-description {
+    margin-top: 16px;
+    color: #7a6071;
+    font-size: 1rem;
+    font-style: italic;
+    line-height: 1.5;
+}
+
+@keyframes sparkle {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.1) rotate(10deg); }
+}
+
+/* Mobile responsive for add memory button */
+@media screen and (max-width: 768px) {
+    .add-memory-section {
+        padding: 40px 0;
+    }
+    
+    .add-memory-btn {
+        padding: 16px 28px;
+        font-size: 1.1rem;
+        gap: 10px;
+    }
+    
+    .add-icon {
+        font-size: 1.3rem;
+    }
+    
+    .add-memory-description {
+        font-size: 0.9rem;
+        margin-top: 12px;
+    }
+}
+
+@media screen and (max-width: 430px) {
+    .add-memory-btn {
+        padding: 14px 24px;
+        font-size: 1rem;
+        gap: 8px;
+    }
+    
+    .add-icon {
+        font-size: 1.2rem;
+    }
+    
+    .add-memory-description {
+        font-size: 0.85rem;
+    }
+}
+
+/* ===== Scroll to Top Button ===== */
+.scroll-to-top-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #E8A0BF, #BFA0E8);
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(232,160,191,0.4);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.scroll-to-top-btn.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.scroll-to-top-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 12px 30px rgba(232,160,191,0.5);
+    background: linear-gradient(135deg, #F0A8C8, #C8A8F0);
+}
+
+.scroll-to-top-btn:active {
+    transform: translateY(-1px) scale(1.02);
+}
+
+.scroll-icon {
+    display: block;
+    animation: bounceUp 2s ease-in-out infinite;
+}
+
+@keyframes bounceUp {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+/* Mobile responsive for scroll to top button */
+@media screen and (max-width: 768px) {
+    .scroll-to-top-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 1.3rem;
+    }
+}
+
+@media screen and (max-width: 430px) {
+    .scroll-to-top-btn {
+        bottom: 15px;
+        right: 15px;
+        width: 45px;
+        height: 45px;
+        font-size: 1.2rem;
+        box-shadow: 0 6px 20px rgba(232,160,191,0.4);
     }
 }
 

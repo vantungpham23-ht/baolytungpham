@@ -1,0 +1,60 @@
+# GitHub Pages Configuration
+# This file configures GitHub Pages for the baolytungpham repository
+
+# Site settings
+title: "Hành Trình Tình Yêu Tùng Phạm & Bảo Ly"
+description: "Khám phá hành trình tình yêu đẹp của Tùng Phạm và Bảo Ly qua album ảnh kỷ niệm, timeline tình yêu và những khoảnh khắc đáng giá."
+url: "https://baolytungpham.space"
+baseurl: ""
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+theme: minima
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Exclude files from processing
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .git
+  - .gitignore
+
+# Include files
+include:
+  - _redirects
+
+# Collections
+collections:
+  images:
+    output: false
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
+      author: "Tùng Phạm"
+      description: "Website chia sẻ hành trình tình yêu và kỷ niệm đẹp của Tùng Phạm và Bảo Ly"
+
+# SEO settings
+seo:
+  type: "WebSite"
+  name: "Hành Trình Tình Yêu Tùng Phạm & Bảo Ly"
+  description: "Khám phá hành trình tình yêu đẹp của Tùng Phạm và Bảo Ly qua album ảnh kỷ niệm, timeline tình yêu và những khoảnh khắc đáng giá."
+  url: "https://baolytungpham.space"
+  image: "/img/og-image.svg"
+  twitter:
+    username: "baolytungpham"
+  facebook:
+    app_id: "123456789"
