@@ -1062,7 +1062,11 @@ function createAudioElements(tracks) {
     tracks.forEach(function(trackName) {
         var audio = document.createElement('audio');
         audio.id = trackName.replace('.mp3', '').replace('music', 'music-track');
-        audio.src = 'music/' + trackName;
+        
+        // Use absolute path for GitHub Pages compatibility
+        var baseUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '');
+        audio.src = baseUrl + '/music/' + trackName;
+        
         audio.preload = 'metadata'; // Changed from 'auto' for better mobile performance
         audio.loop = true;
         audio.volume = 0.7;
@@ -1073,6 +1077,39 @@ function createAudioElements(tracks) {
         // Enhanced Safari compatibility
         audio.setAttribute('webkit-playsinline', 'true');
         audio.setAttribute('playsinline', 'true');
+        
+        // Add error handling for GitHub Pages
+        audio.addEventListener('error', function(e) {
+            console.warn('Audio load error for', trackName, ':', e);
+            console.warn('Current src:', audio.src);
+            console.warn('Network state:', audio.networkState);
+            console.warn('Ready state:', audio.readyState);
+            
+            // Try fallback with relative path
+            if (audio.src.includes('/music/')) {
+                audio.src = './music/' + trackName;
+                console.log('Trying fallback path:', audio.src);
+            }
+        });
+        
+        // Add load event listener
+        audio.addEventListener('canplaythrough', function() {
+            console.log('Audio loaded successfully:', trackName);
+            console.log('Audio duration:', audio.duration);
+        });
+        
+        // Add more detailed logging
+        audio.addEventListener('loadstart', function() {
+            console.log('Audio load started:', trackName);
+        });
+        
+        audio.addEventListener('loadeddata', function() {
+            console.log('Audio data loaded:', trackName);
+        });
+        
+        audio.addEventListener('loadedmetadata', function() {
+            console.log('Audio metadata loaded:', trackName);
+        });
         
         // Store reference
         musicTracks[trackName] = audio;
@@ -1100,6 +1137,15 @@ function initMusicPlayer() {
     createAudioElements(tracks);
     updateTrackDisplay();
     
+    // Preload the first track for better performance
+    if (trackList.length > 0) {
+        var firstTrack = musicTracks[trackList[0]];
+        if (firstTrack) {
+            firstTrack.preload = 'auto';
+            firstTrack.load(); // Force load
+        }
+    }
+    
     // Play button click
     playBtn.addEventListener('click', function() {
         if (isPlaying) {
@@ -1119,33 +1165,53 @@ function playCurrentTrack() {
         // Set volume to default
         track.volume = 0.7;
         
-        // Enhanced play handling for Safari and mobile
-        var playPromise = track.play();
-        
-        if (playPromise !== undefined) {
-            playPromise.then(function() {
-                isPlaying = true;
-                updatePlayButton();
-                hideMobileAudioPrompt();
-                hideEnhancedAudioPrompt();
-                console.log('Music started playing successfully');
-            }).catch(function(e) {
-                console.warn('Could not play track:', e);
-                handlePlaybackError();
-            });
+        // Check if track is ready to play
+        if (track.readyState >= 2) { // HAVE_CURRENT_DATA or higher
+            playTrackDirectly(track);
         } else {
-            // Fallback for older browsers
-            try {
-                track.play();
-                isPlaying = true;
-                updatePlayButton();
-                hideMobileAudioPrompt();
-                hideEnhancedAudioPrompt();
-                console.log('Music started playing (fallback)');
-            } catch(e) {
-                console.warn('Could not play track (fallback):', e);
-                handlePlaybackError();
-            }
+            // Wait for track to be ready
+            track.addEventListener('canplay', function() {
+                playTrackDirectly(track);
+            }, { once: true });
+            
+            // Fallback timeout
+            setTimeout(function() {
+                if (!isPlaying) {
+                    console.warn('Track not ready after timeout, trying anyway');
+                    playTrackDirectly(track);
+                }
+            }, 3000);
+        }
+    }
+}
+
+function playTrackDirectly(track) {
+    // Enhanced play handling for Safari and mobile
+    var playPromise = track.play();
+    
+    if (playPromise !== undefined) {
+        playPromise.then(function() {
+            isPlaying = true;
+            updatePlayButton();
+            hideMobileAudioPrompt();
+            hideEnhancedAudioPrompt();
+            console.log('Music started playing successfully');
+        }).catch(function(e) {
+            console.warn('Could not play track:', e);
+            handlePlaybackError();
+        });
+    } else {
+        // Fallback for older browsers
+        try {
+            track.play();
+            isPlaying = true;
+            updatePlayButton();
+            hideMobileAudioPrompt();
+            hideEnhancedAudioPrompt();
+            console.log('Music started playing (fallback)');
+        } catch(e) {
+            console.warn('Could not play track (fallback):', e);
+            handlePlaybackError();
         }
     }
 }

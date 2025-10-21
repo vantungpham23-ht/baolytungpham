@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Test - GitHub Pages</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #E8A0BF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #D890AF;
+        }
+        .log {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        audio {
+            width: 100%;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔊 Audio Test for GitHub Pages</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Direct Audio Element</h2>
+        <p>Testing direct audio element with different path formats:</p>
+        
+        <h3>Absolute Path (Recommended)</h3>
+        <audio id="audio1" controls preload="metadata">
+            <source src="/music/music.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <button onclick="testAudio('audio1')">Test Play</button>
+        
+        <h3>Relative Path</h3>
+        <audio id="audio2" controls preload="metadata">
+            <source src="./music/music.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <button onclick="testAudio('audio2')">Test Play</button>
+        
+        <h3>Base URL Path</h3>
+        <audio id="audio3" controls preload="metadata">
+            <source src="" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <button onclick="testAudio('audio3')">Test Play</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: JavaScript Audio Creation</h2>
+        <button onclick="createAndTestAudio()">Create Audio with JavaScript</button>
+        <div id="js-audio-container"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: File Availability Check</h2>
+        <button onclick="checkFileAvailability()">Check if music files exist</button>
+        <div id="file-check-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Debug Log</h2>
+        <button onclick="clearLog()">Clear Log</button>
+        <div id="debug-log" class="log"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLog() {
+            document.getElementById('debug-log').innerHTML = '';
+        }
+        
+        function testAudio(audioId) {
+            const audio = document.getElementById(audioId);
+            log(`Testing audio element: ${audioId}`);
+            log(`Audio src: ${audio.src}`);
+            log(`Audio readyState: ${audio.readyState}`);
+            log(`Audio networkState: ${audio.networkState}`);
+            
+            audio.addEventListener('loadstart', () => log(`${audioId}: Load started`));
+            audio.addEventListener('loadeddata', () => log(`${audioId}: Data loaded`));
+            audio.addEventListener('loadedmetadata', () => log(`${audioId}: Metadata loaded`));
+            audio.addEventListener('canplay', () => log(`${audioId}: Can play`));
+            audio.addEventListener('canplaythrough', () => log(`${audioId}: Can play through`));
+            audio.addEventListener('error', (e) => log(`${audioId}: Error - ${e.message || 'Unknown error'}`));
+            audio.addEventListener('play', () => log(`${audioId}: Started playing`));
+            audio.addEventListener('pause', () => log(`${audioId}: Paused`));
+            
+            audio.play().then(() => {
+                log(`${audioId}: Play promise resolved`);
+            }).catch((e) => {
+                log(`${audioId}: Play promise rejected - ${e.message || 'Unknown error'}`);
+            });
+        }
+        
+        function createAndTestAudio() {
+            log('Creating audio element with JavaScript...');
+            
+            // Test different path formats
+            const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '');
+            const paths = [
+                baseUrl + '/music/music.mp3',
+                './music/music.mp3',
+                'music/music.mp3',
+                '/music/music.mp3'
+            ];
+            
+            paths.forEach((path, index) => {
+                const audio = document.createElement('audio');
+                audio.src = path;
+                audio.preload = 'metadata';
+                audio.controls = true;
+                audio.style.width = '100%';
+                audio.style.margin = '5px 0';
+                
+                const container = document.getElementById('js-audio-container');
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = `<p><strong>Path ${index + 1}:</strong> ${path}</p>`;
+                wrapper.appendChild(audio);
+                container.appendChild(wrapper);
+                
+                audio.addEventListener('loadstart', () => log(`JS Audio ${index + 1}: Load started`));
+                audio.addEventListener('loadeddata', () => log(`JS Audio ${index + 1}: Data loaded`));
+                audio.addEventListener('loadedmetadata', () => log(`JS Audio ${index + 1}: Metadata loaded`));
+                audio.addEventListener('canplay', () => log(`JS Audio ${index + 1}: Can play`));
+                audio.addEventListener('canplaythrough', () => log(`JS Audio ${index + 1}: Can play through`));
+                audio.addEventListener('error', (e) => log(`JS Audio ${index + 1}: Error - ${e.message || 'Unknown error'}`));
+            });
+        }
+        
+        function checkFileAvailability() {
+            log('Checking file availability...');
+            const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '');
+            const files = ['music.mp3', 'music2.mp3', 'music3.mp3'];
+            const resultsDiv = document.getElementById('file-check-results');
+            resultsDiv.innerHTML = '<h3>File Check Results:</h3>';
+            
+            files.forEach(file => {
+                const testUrl = baseUrl + '/music/' + file;
+                log(`Checking: ${testUrl}`);
+                
+                fetch(testUrl, { method: 'HEAD' })
+                    .then(response => {
+                        if (response.ok) {
+                            log(`✅ ${file}: Available (${response.status})`);
+                            resultsDiv.innerHTML += `<p>✅ ${file}: Available (${response.status})</p>`;
+                        } else {
+                            log(`❌ ${file}: Not available (${response.status})`);
+                            resultsDiv.innerHTML += `<p>❌ ${file}: Not available (${response.status})</p>`;
+                        }
+                    })
+                    .catch(error => {
+                        log(`❌ ${file}: Error - ${error.message}`);
+                        resultsDiv.innerHTML += `<p>❌ ${file}: Error - ${error.message}</p>`;
+                    });
+            });
+        }
+        
+        // Initialize
+        window.addEventListener('load', () => {
+            log('Audio test page loaded');
+            log(`Current URL: ${window.location.href}`);
+            log(`Base URL: ${window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '')}`);
+            log(`User Agent: ${navigator.userAgent}`);
+            
+            // Set up audio3 with base URL
+            const audio3 = document.getElementById('audio3');
+            const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '');
+            audio3.src = baseUrl + '/music/music.mp3';
+        });
+    </script>
+</body>
+</html>
